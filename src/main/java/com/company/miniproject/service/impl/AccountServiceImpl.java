@@ -104,11 +104,28 @@ public class AccountServiceImpl implements AccountService {
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         
         // Validate unique constraints for update (excluding current account) with detailed error messages
-        if (!account.getUsername().equals(dto.getUsername()) && accountRepository.existsByUsername(dto.getUsername())) {
-            throw new IllegalArgumentException("Username already exists. Please choose a different username.");
+        // Check username uniqueness (only if username is being changed)
+        if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
+            if (!account.getUsername().equals(dto.getUsername()) && accountRepository.existsByUsername(dto.getUsername())) {
+                throw new IllegalArgumentException("Username already exists. Please choose a different username.");
+            }
         }
-        if (!account.getEmail().equals(dto.getEmail()) && accountRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email already exists. Please use a different email address.");
+        
+        // Check email uniqueness (only if email is being changed)
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            // Normalize email (trim) for comparison
+            String normalizedNewEmail = dto.getEmail().trim();
+            String normalizedCurrentEmail = account.getEmail().trim();
+            
+            // Check if email is different from current email (case-insensitive)
+            if (!normalizedCurrentEmail.equalsIgnoreCase(normalizedNewEmail)) {
+                // Check if new email already exists for another account (case-insensitive)
+                // Find account with this email (case-insensitive)
+                Optional<Account> existingAccount = accountRepository.findByEmailIgnoreCase(normalizedNewEmail);
+                if (existingAccount.isPresent() && !existingAccount.get().getId().equals(id)) {
+                    throw new IllegalArgumentException("Email already exists. This email is already used by another user. Please use a different email address.");
+                }
+            }
         }
         
         // For admin accounts, allow status update (admin can edit status of other admin accounts)

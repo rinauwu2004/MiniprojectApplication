@@ -21,6 +21,12 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     
     boolean existsByEmail(String email);
     
+    @Query("SELECT COUNT(a) > 0 FROM Account a WHERE LOWER(a.email) = LOWER(:email)")
+    boolean existsByEmailIgnoreCase(@Param("email") String email);
+    
+    @Query("SELECT a FROM Account a WHERE LOWER(a.email) = LOWER(:email)")
+    Optional<Account> findByEmailIgnoreCase(@Param("email") String email);
+    
     @Query("SELECT DISTINCT a FROM Account a JOIN a.roles r WHERE " +
            "(:keyword IS NULL OR :keyword = '' OR LOWER(a.username) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(a.email) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:roleId IS NULL OR r.id = :roleId) AND " +

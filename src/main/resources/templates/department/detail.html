@@ -64,7 +64,7 @@
                                 <option value="" th:text="#{common.select}">-- Select Employee --</option>
                                 <option th:each="emp : ${availableEmployees}" 
                                         th:value="${emp.id}"
-                                        th:text="${emp.fullName + ' - ' + (emp.department != null ? emp.department.name : #messages.msg('common.not.available'))}">
+                                        th:text="${emp.department != null ? (emp.fullName + ' - ' + emp.department.name) : emp.fullName}">
                                     John Doe - IT
                                 </option>
                             </select>
@@ -114,7 +114,15 @@
                                     <td th:text="${emp.account.email}">john.doe@example.com</td>
                                     <td th:text="${emp.phone}">0123456789</td>
                                     <td>
-                                        <span class="badge bg-secondary" th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Male</span>
+                                        <span th:if="${emp.gender?.name() == 'Male'}" 
+                                              class="badge bg-primary" 
+                                              th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Male</span>
+                                        <span th:if="${emp.gender?.name() == 'Female'}" 
+                                              class="badge bg-danger" 
+                                              th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Female</span>
+                                        <span th:if="${emp.gender?.name() == 'Other'}" 
+                                              class="badge bg-warning text-dark" 
+                                              th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Other</span>
                                     </td>
                                     <td th:text="${#temporals.format(emp.birthDate, 'yyyy-MM-dd')}">1990-01-01</td>
                                     <td>

@@ -84,7 +84,15 @@
                                         <span th:unless="${emp.department != null}" class="text-muted">N/A</span>
                                     </td>
                                     <td>
-                                        <span th:text="${emp.gender}" class="badge bg-secondary">Male</span>
+                                        <span th:if="${emp.gender?.name() == 'Male'}" 
+                                              class="badge bg-primary" 
+                                              th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Male</span>
+                                        <span th:if="${emp.gender?.name() == 'Female'}" 
+                                              class="badge bg-danger" 
+                                              th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Female</span>
+                                        <span th:if="${emp.gender?.name() == 'Other'}" 
+                                              class="badge bg-warning text-dark" 
+                                              th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Other</span>
                                     </td>
                                     <td>
                                         <a th:href="@{/employees/{id}/edit(id=${emp.id})}" 

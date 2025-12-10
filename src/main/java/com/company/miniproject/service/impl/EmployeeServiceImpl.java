@@ -73,8 +73,11 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (accountRepository.existsByUsername(dto.getUsername())) {
             throw new IllegalArgumentException("Username already exists. Please choose a different username.");
         }
-        if (accountRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email already exists. Please use a different email address.");
+        // Check email uniqueness (case-insensitive)
+        String normalizedEmail = dto.getEmail().trim();
+        Optional<Account> existingAccount = accountRepository.findByEmailIgnoreCase(normalizedEmail);
+        if (existingAccount.isPresent()) {
+            throw new IllegalArgumentException("Email already exists. This email is already used by another user. Please use a different email address.");
         }
         if (employeeRepository.existsByPhone(dto.getPhone())) {
             throw new IllegalArgumentException("Phone number already exists. Please use a different phone number.");
@@ -126,10 +129,16 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new IllegalArgumentException("Username already exists. Please choose a different username.");
         }
         
-        // Check email uniqueness (if changed) with detailed error messages
-        if (!account.getEmail().equals(dto.getEmail()) && 
-            accountRepository.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("Email already exists. Please use a different email address.");
+        // Check email uniqueness (if changed) with detailed error messages (case-insensitive)
+        String normalizedNewEmail = dto.getEmail().trim();
+        String normalizedCurrentEmail = account.getEmail().trim();
+        
+        if (!normalizedCurrentEmail.equalsIgnoreCase(normalizedNewEmail)) {
+            // Check if new email already exists for another account (case-insensitive)
+            Optional<Account> existingAccount = accountRepository.findByEmailIgnoreCase(normalizedNewEmail);
+            if (existingAccount.isPresent() && !existingAccount.get().getId().equals(account.getId())) {
+                throw new IllegalArgumentException("Email already exists. This email is already used by another user. Please use a different email address.");
+            }
         }
         
         // Check phone uniqueness (if changed) with detailed error messages
