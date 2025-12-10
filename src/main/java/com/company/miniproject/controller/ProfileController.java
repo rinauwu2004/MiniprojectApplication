@@ -224,7 +224,18 @@ public class ProfileController {
             employeeService.update(employee.getId(), dto);
             redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully");
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            String errorMsg = e.getMessage();
+            if (errorMsg != null) {
+                if (errorMsg.contains("Username already exists")) {
+                    result.rejectValue("username", "error.username.exists", errorMsg);
+                } else if (errorMsg.contains("Email already exists")) {
+                    result.rejectValue("email", "error.email.exists", errorMsg);
+                } else if (errorMsg.contains("Phone number already exists") || errorMsg.contains("Phone already exists")) {
+                    result.rejectValue("phone", "error.phone.exists", errorMsg);
+                } else {
+                    model.addAttribute("errorMessage", errorMsg);
+                }
+            }
             List<Department> departments = departmentRepository.findAll();
             model.addAttribute("departments", departments);
             model.addAttribute("genders", Gender.values());
