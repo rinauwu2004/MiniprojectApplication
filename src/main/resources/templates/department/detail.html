@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{department.detail}">Department Details</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <!-- Department Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-building"></i> 
+                    <span th:text="${department.name}">Department Name</span>
+                </h5>
+                <div>
+                    <a th:href="@{/departments/{id}/edit(id=${department.id})}" 
+                       sec:authorize="hasRole('ADMIN')"
+                       class="btn btn-sm btn-primary me-2">
+                        <i class="fas fa-edit"></i> <span th:text="#{department.edit.department}">Edit Department</span>
+                    </a>
+                    <a th:href="@{/departments}" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-arrow-left"></i> <span th:text="#{department.back.to.list}">Back to List</span>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%" th:text="#{department.name} + ':'">Department Name:</th>
+                                <td th:text="${department.name}">IT</td>
+                            </tr>
+                            <tr>
+                                <th th:text="#{common.description} + ':'">Description:</th>
+                                <td th:text="${department.description ?: 'N/A'}">Information Technology Department</td>
+                            </tr>
+                            <tr>
+                                <th th:text="#{department.total.employees} + ':'">Total Employees:</th>
+                                <td>
+                                    <span class="badge bg-info" th:text="${department.employees != null ? department.employees.size() : 0}">0</span>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Employee to Department -->
+        <div class="card mb-4" sec:authorize="hasRole('ADMIN')">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-plus"></i> <span th:text="#{department.add.employee}">Add Employee to Department</span></h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/departments/{id}/add-employee(id=${department.id})}" method="post">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <label for="employeeId" class="form-label" th:text="#{employee.select}">Select Employee</label>
+                            <select class="form-select" id="employeeId" name="employeeId" required>
+                                <option value="" th:text="#{common.select}">-- Select Employee --</option>
+                                <option th:each="emp : ${availableEmployees}" 
+                                        th:value="${emp.id}"
+                                        th:text="${emp.fullName + ' - ' + (emp.department != null ? emp.department.name : #messages.msg('common.not.available'))}">
+                                    John Doe - IT
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-plus"></i> <span th:text="#{department.add.employee}">Add Employee</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div th:if="${availableEmployees == null or availableEmployees.isEmpty()}" class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i> <span th:text="#{department.no.available.employees}">No available employees to add.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employees in Department -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users"></i> <span th:text="#{department.employees.in}">Employees in this Department</span></h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${department.employees == null or department.employees.isEmpty()}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> <span th:text="#{department.no.employees}">No employees in this department yet.</span>
+                </div>
+                <div th:if="${department.employees != null and !department.employees.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{common.id}">ID</th>
+                                    <th th:text="#{employee.full.name}">Full Name</th>
+                                    <th th:text="#{user.email}">Email</th>
+                                    <th th:text="#{employee.phone}">Phone</th>
+                                    <th th:text="#{employee.gender}">Gender</th>
+                                    <th th:text="#{employee.birth.date}">Birth Date</th>
+                                    <th th:text="#{common.actions}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="emp : ${department.employees}">
+                                    <td th:text="${emp.id}">1</td>
+                                    <td>
+                                        <strong th:text="${emp.fullName}">John Doe</strong>
+                                    </td>
+                                    <td th:text="${emp.account.email}">john.doe@example.com</td>
+                                    <td th:text="${emp.phone}">0123456789</td>
+                                    <td>
+                                        <span class="badge bg-secondary" th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Male</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(emp.birthDate, 'yyyy-MM-dd')}">1990-01-01</td>
+                                    <td>
+                                        <a th:href="@{/employees/{id}/edit(id=${emp.id})}" 
+                                           class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-eye"></i> <span th:text="#{common.view}">View</span>
+                                        </a>
+                                        <form th:action="@{/departments/{id}/remove-employee/{employeeId}(id=${department.id}, employeeId=${emp.id})}" 
+                                              method="post" 
+                                              style="display: inline;"
+                                              sec:authorize="hasRole('ADMIN')"
+                                              th:onsubmit="'return confirm(\'' + #{department.confirm.remove.employee} + '\');'">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> <span th:text="#{common.remove}">Remove</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

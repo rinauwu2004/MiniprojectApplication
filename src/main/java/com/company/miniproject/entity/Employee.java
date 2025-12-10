@@ -1,11 +1,8 @@
 package com.company.miniproject.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = {"department", "account", "assignments"})
 @EqualsAndHashCode(exclude = {"department", "account", "assignments"})
 public class Employee {
@@ -24,7 +22,7 @@ public class Employee {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "full_name", nullable = false, length = 255)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     @Column(name = "birth_date", nullable = false)
@@ -37,7 +35,7 @@ public class Employee {
     @Column(name = "phone", unique = true, nullable = false, length = 30)
     private String phone;
 
-    @Column(name = "address", length = 255)
+    @Column(name = "address")
     private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -53,7 +51,7 @@ public class Employee {
 
     public void setDepartment(Department department) {
         this.department = department;
-        if (department != null && !department.getEmployees().contains(this)) {
+        if (department != null) {
             department.getEmployees().add(this);
         }
     }

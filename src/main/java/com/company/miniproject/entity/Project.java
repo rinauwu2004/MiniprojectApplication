@@ -1,11 +1,10 @@
 package com.company.miniproject.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,6 +14,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = {"assignments"})
 @EqualsAndHashCode(exclude = {"assignments"})
 public class Project {
@@ -24,6 +24,8 @@ public class Project {
     @Column(name = "id")
     private Integer id;
 
+    @NotBlank(message = "Project name is required")
+    @Size(min = 2, max = 100, message = "Project name must be between 2 and 100 characters")
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 

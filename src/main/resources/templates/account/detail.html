@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{user.detail}">User Details</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i>
+                    <span th:text="${account.username}">Username</span> <span th:text="#{user.detail}">Details</span>
+                </h5>
+                <div>
+                    <a th:href="@{/accounts/{id}/edit(id=${account.id})}" 
+                       th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
+                       class="btn btn-sm btn-primary me-2">
+                        <i class="fas fa-edit"></i> <span th:text="#{user.edit}">Edit User</span>
+                    </a>
+                    <a th:href="@{/accounts/{id}/change-password(id=${account.id})}" 
+                       th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
+                       class="btn btn-sm btn-warning me-2">
+                        <i class="fas fa-key"></i> <span th:text="#{user.change.password}">Change Password</span>
+                    </a>
+                    <a th:href="@{/accounts}" class="btn btn-sm btn-secondary">
+                        <i class="fas fa-arrow-left"></i> <span th:text="#{user.back.to.list}">Back to List</span>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%" th:text="#{user.username} + ':'">Username:</th>
+                                <td th:text="${account.username}">admin1</td>
+                            </tr>
+                            <tr>
+                                <th th:text="#{user.email} + ':'">Email:</th>
+                                <td th:text="${account.email}">admin1@company.com</td>
+                            </tr>
+                            <tr>
+                                <th th:text="#{common.status} + ':'">Status:</th>
+                                <td>
+                                    <span th:switch="${account.status?.name()}" class="badge">
+                                        <span th:case="'Active'" class="badge bg-success">
+                                            <i class="fas fa-check-circle"></i> <span th:text="#{status.active}">Active</span>
+                                        </span>
+                                        <span th:case="'Blocked'" class="badge bg-danger">
+                                            <i class="fas fa-ban"></i> <span th:text="#{status.blocked}">Blocked</span>
+                                        </span>
+                                        <span th:case="*" class="badge bg-secondary" th:text="${account.status}">Unknown</span>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th th:text="#{user.roles} + ':'">Roles:</th>
+                                <td>
+                                    <span th:each="role : ${account.roles}" class="badge me-1">
+                                        <span th:if="${role.name == 'ADMIN'}" class="badge bg-danger" th:text="#{role.admin}">ADMIN</span>
+                                        <span th:if="${role.name == 'MANAGER'}" class="badge bg-warning text-dark" th:text="#{role.manager}">MANAGER</span>
+                                        <span th:if="${role.name == 'EMPLOYEE'}" class="badge bg-info" th:text="#{role.employee}">EMPLOYEE</span>
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr th:if="${account.employee != null}">
+                                <th th:text="#{department.employee.record} + ':'">Employee Record:</th>
+                                <td>
+                                    <a th:href="@{/employees/{id}/edit(id=${account.employee.id})}" 
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-user"></i> <span th:text="#{department.view.employee.profile}">View Employee Profile</span>
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

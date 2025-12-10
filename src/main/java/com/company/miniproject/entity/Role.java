@@ -1,11 +1,8 @@
 package com.company.miniproject.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,6 +11,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = {"accounts"})
 @EqualsAndHashCode(exclude = {"accounts"})
 public class Role {

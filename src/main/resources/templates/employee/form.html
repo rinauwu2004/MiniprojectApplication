@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:if="${employeeId != null}" th:text="#{employee.edit}">Edit Employee</title>
+    <title th:unless="${employeeId != null}" th:text="#{employee.new}">New Employee</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-plus"></i> 
+                    <span th:if="${employeeId != null}" th:text="#{employee.edit}">Edit Employee</span>
+                    <span th:unless="${employeeId != null}" th:text="#{employee.create.new}">Create New Employee</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}">Error</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <form th:action="${formAction}" 
+                      th:object="${employeeDto}" 
+                      method="post">
+                    
+                    <h6 class="mb-3 text-primary"><i class="fas fa-user"></i> <span th:text="#{form.label.personal.info}">Personal Information</span></h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fullName" class="form-label">
+                                <span th:text="#{form.label.full.name}">Full Name</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="fullName" 
+                                   th:field="*{fullName}" 
+                                   th:placeholder="#{form.placeholder.full.name}"
+                                   required>
+                            <div th:if="${#fields.hasErrors('fullName')}" class="text-danger">
+                                <span th:errors="*{fullName}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="birthDate" class="form-label">
+                                <span th:text="#{form.label.birth.date}">Birth Date</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="birthDate" 
+                                   name="birthDate"
+                                   th:value="${employeeDto?.birthDate != null ? #temporals.format(employeeDto.birthDate, 'yyyy-MM-dd') : ''}"
+                                   th:classappend="${#fields.hasErrors('birthDate')} ? 'is-invalid' : ''"
+                                   required>
+                            <div th:if="${#fields.hasErrors('birthDate')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{birthDate}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">
+                                <span th:text="#{form.label.gender}">Gender</span> <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="gender" th:field="*{gender}" required>
+                                <option value="" th:text="#{form.select.gender}">Select Gender</option>
+                                <option th:each="g : ${genders}" 
+                                        th:value="${g}" 
+                                        th:text="#{'gender.' + __${#strings.toLowerCase(g)}__}">Male</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('gender')}" class="text-danger">
+                                <span th:errors="*{gender}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">
+                                <span th:text="#{form.label.phone}">Phone</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="phone" 
+                                   th:field="*{phone}" 
+                                   th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid' : ''"
+                                   th:placeholder="#{form.placeholder.phone}"
+                                   required>
+                            <div th:if="${#fields.hasErrors('phone')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{phone}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label" th:text="#{form.label.address}">Address</label>
+                        <textarea class="form-control" 
+                                  id="address" 
+                                  th:field="*{address}" 
+                                  rows="2"
+                                  th:placeholder="#{form.placeholder.address}"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="departmentId" class="form-label">
+                            <span th:text="#{form.label.department}">Department</span> <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="departmentId" th:field="*{departmentId}" required>
+                            <option value="" th:text="#{form.select.department}">Select Department</option>
+                            <option th:each="dept : ${departments}" 
+                                    th:value="${dept.id}" 
+                                    th:text="${dept.name}">IT</option>
+                        </select>
+                        <div th:if="${#fields.hasErrors('departmentId')}" class="text-danger">
+                            <span th:errors="*{departmentId}">Error</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Information - Only visible when creating new employee -->
+                    <div th:if="${employeeId == null}">
+                        <hr class="my-4">
+                        
+                        <h6 class="mb-3 text-primary"><i class="fas fa-key"></i> <span th:text="#{form.label.account.info}">Account Information</span></h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">
+                                    <span th:text="#{form.label.username}">Username</span> <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       th:field="*{username}" 
+                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                                       th:placeholder="#{form.placeholder.username}"
+                                       required>
+                                <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle"></i> <span th:errors="*{username}">Error</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">
+                                    <span th:text="#{form.label.email}">Email</span> <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       th:field="*{email}" 
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                       th:placeholder="#{form.placeholder.email}"
+                                       required>
+                                <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle"></i> <span th:errors="*{email}">Error</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Account Information - Only visible to ADMIN when editing -->
+                    <div th:if="${employeeId != null}" sec:authorize="hasRole('ADMIN')">
+                        <hr class="my-4">
+                        
+                        <h6 class="mb-3 text-primary"><i class="fas fa-key"></i> <span th:text="#{form.label.account.info}">Account Information</span></h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">
+                                    <span th:text="#{form.label.username}">Username</span> <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="username" 
+                                       th:field="*{username}" 
+                                       th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                                       th:placeholder="#{form.placeholder.username}"
+                                       required>
+                                <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle"></i> <span th:errors="*{username}">Error</span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">
+                                    <span th:text="#{form.label.email}">Email</span> <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" 
+                                       class="form-control" 
+                                       id="email" 
+                                       th:field="*{email}" 
+                                       th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                       th:placeholder="#{form.placeholder.email}"
+                                       required>
+                                <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle"></i> <span th:errors="*{email}">Error</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Hidden fields for username and email when MANAGER edits (to preserve original values) -->
+                    <div th:if="${employeeId != null}" sec:authorize="!hasRole('ADMIN')">
+                        <input type="hidden" th:field="*{username}">
+                        <input type="hidden" th:field="*{email}">
+                    </div>
+                    
+                    <!-- Password field only for new employee -->
+                    <div class="mb-3" th:if="${employeeId == null}">
+                        <label for="password" class="form-label">
+                            <span th:text="#{form.label.password}">Password</span> <span class="text-danger">*</span>
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               th:field="*{password}" 
+                               th:placeholder="#{form.placeholder.password}"
+                               required>
+                        <div th:if="${#fields.hasErrors('password')}" class="text-danger">
+                            <span th:errors="*{password}">Error</span>
+                        </div>
+                        <small class="form-text text-muted">Minimum 6 characters</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a th:href="@{/employees}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> <span th:text="#{employee.back.to.list}">Back to List</span>
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            <span th:if="${employeeId != null}" th:text="#{employee.update}">Update Employee</span>
+                            <span th:unless="${employeeId != null}" th:text="#{employee.create}">Create Employee</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>
+

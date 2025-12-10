@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{user.title}">Users Management</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-users-cog"></i> <span th:text="#{user.title}">Users Management</span></h5>
+                <a th:href="@{/accounts/new}" class="btn btn-light btn-sm">
+                    <i class="fas fa-plus"></i> <span th:text="#{user.new}">Add New User</span>
+                </a>
+            </div>
+            <div class="card-body">
+                <!-- Search and Filter Form -->
+                <form th:action="@{/accounts}" method="get" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="keyword" class="form-label" th:text="#{user.search.label}">Search by Username or Email</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="keyword" 
+                                   name="keyword" 
+                                   th:value="${keyword}"
+                                   th:placeholder="#{user.search.placeholder}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="roleId" class="form-label" th:text="#{user.filter.role}">Filter by Role</label>
+                            <select class="form-select" id="roleId" name="roleId">
+                                <option value="" th:text="#{user.all.roles}">All Roles</option>
+                                <option th:each="role : ${roles}" 
+                                        th:value="${role.id}" 
+                                        th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}"
+                                        th:selected="${roleId != null and roleId == role.id}">
+                                    ADMIN
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="status" class="form-label" th:text="#{user.filter.status}">Filter by Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="" th:text="#{user.all.statuses}">All Statuses</option>
+                                <option th:each="statusOption : ${statuses}" 
+                                        th:value="${statusOption}" 
+                                        th:text="#{'status.' + __${#strings.toLowerCase(statusOption)}__}"
+                                        th:selected="${status != null and status == statusOption}">
+                                    Active
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2 w-100">
+                                <i class="fas fa-search"></i> <span th:text="#{common.filter}">Filter</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <a th:href="@{/accounts}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-redo"></i> <span th:text="#{user.reset.filters}">Reset Filters</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Account List -->
+                <div th:if="${accounts == null or accounts.isEmpty()}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> <span th:text="#{user.no.accounts}">No accounts found.</span>
+                </div>
+                <div th:if="${accounts != null and !accounts.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{common.id}">ID</th>
+                                    <th th:text="#{user.username}">Username</th>
+                                    <th th:text="#{user.email}">Email</th>
+                                    <th th:text="#{common.status}">Status</th>
+                                    <th th:text="#{user.roles}">Roles</th>
+                                    <th th:text="#{common.actions}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="account : ${accounts}">
+                                    <td th:text="${account.id}">1</td>
+                                    <td>
+                                        <strong>
+                                            <a th:href="@{/accounts/{id}(id=${account.id})}" 
+                                               th:text="${account.username}"
+                                               class="text-decoration-none">admin1</a>
+                                        </strong>
+                                    </td>
+                                    <td th:text="${account.email}">admin1@company.com</td>
+                                    <td>
+                                        <span th:switch="${account.status?.name()}" class="badge">
+                                            <span th:case="'Active'" class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> <span th:text="#{status.active}">Active</span>
+                                            </span>
+                                            <span th:case="'Blocked'" class="badge bg-danger">
+                                                <i class="fas fa-ban"></i> <span th:text="#{status.blocked}">Blocked</span>
+                                            </span>
+                                            <span th:case="*" class="badge bg-secondary" th:text="${account.status}">Unknown</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span th:each="role : ${account.roles}" class="badge me-1">
+                                            <span th:if="${role.name == 'ADMIN'}" class="badge bg-danger" th:text="#{role.admin}">ADMIN</span>
+                                            <span th:if="${role.name == 'MANAGER'}" class="badge bg-warning text-dark" th:text="#{role.manager}">MANAGER</span>
+                                            <span th:if="${role.name == 'EMPLOYEE'}" class="badge bg-info" th:text="#{role.employee}">EMPLOYEE</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/accounts/{id}(id=${account.id})}" 
+                                           class="btn btn-sm btn-info me-1">
+                                            <i class="fas fa-eye"></i> <span th:text="#{common.view}">View</span>
+                                        </a>
+                                        <a th:href="@{/accounts/{id}/edit(id=${account.id})}" 
+                                           class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
+                                        </a>
+                                        <a th:href="@{/accounts/{id}/change-password(id=${account.id})}" 
+                                           th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
+                                           class="btn btn-sm btn-warning me-1">
+                                            <i class="fas fa-key"></i> <span th:text="#{user.change.password}">Change Password</span>
+                                        </a>
+                                        <form th:action="@{/accounts/{id}/delete(id=${account.id})}" 
+                                              th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
+                                              method="post" 
+                                              style="display: inline;"
+                                              th:onsubmit="'return confirm(\'' + #{user.confirm.delete} + '\');'">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div th:if="${totalPages > 1}" class="d-flex justify-content-between align-items-center mt-3">
+                        <div>
+                            <span class="text-muted">
+                                <span th:text="#{user.showing.page}">Showing page</span> 
+                                <span th:text="${currentPage + 1}">1</span> 
+                                <span th:text="#{common.of}">of</span> 
+                                <span th:text="${totalPages}">1</span>
+                            </span>
+                        </div>
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" 
+                                       th:href="@{/accounts(page=${currentPage - 1}, keyword=${keyword}, roleId=${roleId}, status=${status})}"
+                                       th:text="#{common.previous}">Previous</a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link" 
+                                       th:href="@{/accounts(page=${i}, keyword=${keyword}, roleId=${roleId}, status=${status})}" 
+                                       th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" 
+                                       th:href="@{/accounts(page=${currentPage + 1}, keyword=${keyword}, roleId=${roleId}, status=${status})}"
+                                       th:text="#{common.next}">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

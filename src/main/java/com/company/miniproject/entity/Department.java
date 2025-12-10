@@ -1,11 +1,10 @@
 package com.company.miniproject.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,6 +13,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = {"employees"})
 @EqualsAndHashCode(exclude = {"employees"})
 public class Department {
@@ -23,13 +23,15 @@ public class Department {
     @Column(name = "id")
     private Integer id;
 
+    @NotBlank(message = "Department name is required")
+    @Size(min = 2, max = 50, message = "Department name must be between 2 and 50 characters")
     @Column(name = "name", unique = true, nullable = false, length = 50)
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "department")
     private Set<Employee> employees = new HashSet<>();
 
     public void addEmployee(Employee employee) {

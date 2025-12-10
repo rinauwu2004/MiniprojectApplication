@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:lang="${#locale}">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/login.css}"/>
+    <title th:text="#{auth.title}"></title>
+</head>
+
+<body>
+<div class="page-wrapper">
+    <fieldset class="lang-switch btn-group btn-group-sm" aria-label="Language switcher">
+        <a class="btn btn-light" th:classappend="${#locale.language} == 'en' ? ' active' : ''"
+           th:href="@{/login(lang='en')}" th:aria-label="#{lang.en.label}">
+            <img th:src="@{/images/united-kingdom.png}" alt="English"> <span th:text="#{lang.en}"></span>
+        </a>
+        <a class="btn btn-light" th:classappend="${#locale.language} == 'vi' ? ' active' : ''"
+           th:href="@{/login(lang='vi')}" th:aria-label="#{lang.vi.label}">
+            <img th:src="@{/images/vietnam.png}" alt="Vietnamese"> <span th:text="#{lang.vi}"></span>
+        </a>
+    </fieldset>
+    <div class="container" id="container">
+        <div class="form-container sign-in">
+            <form method="post" th:action="@{/login}">
+                <h1 th:text="#{auth.login.title}">Sign In</h1>
+
+                <div th:if="${loginErrorKey}" class="alert-message error-message">
+                    <span th:text="#{${loginErrorKey}}"></span>
+                </div>
+                <div th:if="${logoutSuccessKey}" class="alert-message success-message">
+                    <span th:text="#{${logoutSuccessKey}}"></span>
+                </div>
+
+                <input type="text" name="username" autocomplete="username" placeholder="Username"
+                       th:placeholder="#{auth.login.username.placeholder}"
+                       th:value="${lastUsername}"
+                       required/>
+                <input type="password" name="password" autocomplete="current-password" placeholder="Password"
+                       th:placeholder="#{auth.login.password.placeholder}" required/>
+                <div class="remember-me-container">
+                    <input type="checkbox" id="remember-me" name="remember-me">
+                    <label for="remember-me" th:text="#{auth.login.remember}">Remember Me</label>
+                </div>
+                <button type="submit" th:text="#{auth.login.submit}">Sign in</button>
+
+                <a href="#" th:text="#{auth.login.forgot}"></a>
+            </form>
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-right">
+                    <h1 th:text="#{auth.toggle.right.title}">Access Your Account</h1>
+                    <p th:text="#{auth.toggle.right.desc}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+</html>

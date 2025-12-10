@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:if="${project.id != null}" th:text="#{project.edit}">Edit Project</title>
+    <title th:unless="${project.id != null}" th:text="#{project.new}">New Project</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-project-diagram"></i>
+                    <span th:if="${project?.id != null}" th:text="#{project.edit}">Edit Project</span>
+                    <span th:unless="${project?.id != null}" th:text="#{project.new}">New Project</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <form th:action="${formAction}" method="post" th:object="${project}" id="projectForm">
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="name" class="form-label">
+                                <span th:text="#{form.label.project.name}">Project Name</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="name" 
+                                   th:field="*{name}"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''"
+                                   required>
+                            <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{name}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label" th:text="#{form.label.start.date}">Start Date</label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="startDate" 
+                                   name="startDate"
+                                   th:value="${project?.startDate != null ? #temporals.format(project.startDate, 'yyyy-MM-dd') : ''}"
+                                   th:classappend="${#fields.hasErrors('startDate')} ? 'is-invalid' : ''">
+                            <div th:if="${#fields.hasErrors('startDate')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{startDate}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="endDate" class="form-label" th:text="#{form.label.end.date}">End Date</label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="endDate" 
+                                   name="endDate"
+                                   th:value="${project?.endDate != null ? #temporals.format(project.endDate, 'yyyy-MM-dd') : ''}"
+                                   th:classappend="${#fields.hasErrors('endDate')} ? 'is-invalid' : ''">
+                            <div th:if="${#fields.hasErrors('endDate')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{endDate}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="status" class="form-label">
+                                <span th:text="#{form.label.status}">Status</span> <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" 
+                                    id="status" 
+                                    th:field="*{status}"
+                                    th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''"
+                                    required>
+                                <option value="" th:text="#{form.select.status}">-- Select Status --</option>
+                                <option th:each="statusOption : ${statuses}" 
+                                        th:value="${statusOption}" 
+                                        th:text="#{'status.' + __${#strings.toLowerCase(statusOption)}__}">Status</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('status')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{status}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a th:href="@{/projects}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> <span th:text="#{project.back.to.list}">Back to List</span>
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            <span th:if="${project?.id != null}" th:text="#{project.update}">Update Project</span>
+                            <span th:unless="${project?.id != null}" th:text="#{project.create}">Create Project</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <layout:block name="scripts">
+        <script>
+            // Validate end date > start date with visual feedback
+            document.addEventListener('DOMContentLoaded', function() {
+                const startDate = document.getElementById('startDate');
+                const endDate = document.getElementById('endDate');
+                const form = document.querySelector('form');
+                let errorDiv = null;
+                
+                function showDateError(message) {
+                    // Remove existing error if any
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                    
+                    // Create error message div
+                    errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-danger alert-dismissible fade show mt-2';
+                    errorDiv.setAttribute('role', 'alert');
+                    errorDiv.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <strong>Error:</strong> ' + message + 
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+                    
+                    // Insert after endDate field
+                    const endDateContainer = endDate.closest('.mb-3');
+                    if (endDateContainer) {
+                        endDateContainer.appendChild(errorDiv);
+                    }
+                    
+                    // Add invalid class to endDate
+                    endDate.classList.add('is-invalid');
+                }
+                
+                function removeDateError() {
+                    if (errorDiv) {
+                        errorDiv.remove();
+                        errorDiv = null;
+                    }
+                    endDate.classList.remove('is-invalid');
+                }
+                
+                function validateDates() {
+                    if (startDate && endDate && startDate.value && endDate.value) {
+                        const start = new Date(startDate.value);
+                        const end = new Date(endDate.value);
+                        
+                        if (end <= start) {
+                            showDateError(/*[[#{project.end.date.error}]]*/ 'End date must be after start date');
+                            return false;
+                        } else {
+                            removeDateError();
+                        }
+                    } else {
+                        removeDateError();
+                    }
+                    return true;
+                }
+                
+                if (startDate) {
+                    startDate.addEventListener('change', validateDates);
+                }
+                if (endDate) {
+                    endDate.addEventListener('change', validateDates);
+                }
+                
+                form.addEventListener('submit', function(e) {
+                    if (!validateDates()) {
+                        e.preventDefault();
+                        // Scroll to error
+                        if (errorDiv) {
+                            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                });
+            });
+        </script>
+    </layout:block>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{profile.edit}">Edit Profile</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-edit"></i> 
+                    <span th:text="#{profile.edit}">Edit Profile</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}">Error</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <form th:action="${formAction}" 
+                      th:object="${employeeDto}" 
+                      method="post">
+                    
+                    <h6 class="mb-3 text-primary"><i class="fas fa-user"></i> <span th:text="#{form.label.personal.info}">Personal Information</span></h6>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fullName" class="form-label">
+                                <span th:text="#{form.label.full.name}">Full Name</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="fullName" 
+                                   th:field="*{fullName}" 
+                                   th:placeholder="#{form.placeholder.full.name}"
+                                   required>
+                            <div th:if="${#fields.hasErrors('fullName')}" class="text-danger">
+                                <span th:errors="*{fullName}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="birthDate" class="form-label">
+                                <span th:text="#{form.label.birth.date}">Birth Date</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="birthDate" 
+                                   name="birthDate"
+                                   th:value="${employeeDto?.birthDate != null ? #temporals.format(employeeDto.birthDate, 'yyyy-MM-dd') : ''}"
+                                   th:classappend="${#fields.hasErrors('birthDate')} ? 'is-invalid' : ''"
+                                   required>
+                            <div th:if="${#fields.hasErrors('birthDate')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{birthDate}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">
+                                <span th:text="#{form.label.gender}">Gender</span> <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="gender" th:field="*{gender}" required>
+                                <option value="" th:text="#{form.select.gender}">Select Gender</option>
+                                <option th:each="g : ${genders}" 
+                                        th:value="${g}" 
+                                        th:text="#{'gender.' + __${#strings.toLowerCase(g)}__}">Male</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('gender')}" class="text-danger">
+                                <span th:errors="*{gender}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">
+                                <span th:text="#{form.label.phone}">Phone</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="phone" 
+                                   th:field="*{phone}" 
+                                   th:placeholder="#{form.placeholder.phone}"
+                                   required>
+                            <div th:if="${#fields.hasErrors('phone')}" class="text-danger">
+                                <span th:errors="*{phone}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="address" class="form-label" th:text="#{form.label.address}">Address</label>
+                        <textarea class="form-control" 
+                                  id="address" 
+                                  th:field="*{address}" 
+                                  rows="2"
+                                  th:placeholder="#{form.placeholder.address}"></textarea>
+                    </div>
+                    
+                    <!-- Hidden fields for username, email, departmentId (read-only) -->
+                    <input type="hidden" th:field="*{username}">
+                    <input type="hidden" th:field="*{email}">
+                    <input type="hidden" th:field="*{departmentId}">
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a th:href="@{/profile}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> <span th:text="#{common.back}">Back</span>
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            <span th:text="#{profile.update}">Update Profile</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

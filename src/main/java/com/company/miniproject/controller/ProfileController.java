@@ -1,0 +1,241 @@
+package com.company.miniproject.controller;
+
+import com.company.miniproject.dto.ChangePasswordDto;
+import com.company.miniproject.dto.EmployeeRegistrationDto;
+import com.company.miniproject.entity.Account;
+import com.company.miniproject.entity.Department;
+import com.company.miniproject.entity.Employee;
+import com.company.miniproject.entity.Gender;
+import com.company.miniproject.repository.AccountRepository;
+import com.company.miniproject.repository.DepartmentRepository;
+import com.company.miniproject.repository.EmployeeRepository;
+import com.company.miniproject.service.AccountService;
+import com.company.miniproject.service.EmployeeService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+import java.util.Optional;
+
+@Controller
+@RequestMapping("/profile")
+public class ProfileController {
+
+    @Autowired
+    private AccountRepository accountRepository;
+    
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    
+    @Autowired
+    private AccountService accountService;
+    
+    @Autowired
+    private EmployeeService employeeService;
+    
+    @Autowired
+    private DepartmentRepository departmentRepository;
+
+    @GetMapping
+    @Transactional(readOnly = true)
+    public String showProfile(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        
+        String username = authentication.getName();
+        
+        // Find account by username
+        Optional<Account> accountOpt = accountRepository.findByUsername(username);
+        if (accountOpt.isEmpty()) {
+            model.addAttribute("errorMessage", "Account not found");
+            return "profile/view";
+        }
+        
+        Account account = accountOpt.get();
+        // Force load roles and employee
+        if (account.getRoles() != null) {
+            account.getRoles().size();
+        }
+        if (account.getEmployee() != null) {
+            account.getEmployee().getId(); // Force load employee
+        }
+        model.addAttribute("account", account);
+        
+        // Try to find employee record
+        Optional<Employee> employeeOpt = employeeRepository.findByAccountId(account.getId());
+        if (employeeOpt.isPresent()) {
+            model.addAttribute("employee", employeeOpt.get());
+        }
+        
+        return "profile/view";
+    }
+
+    @GetMapping("/change-password")
+    public String showChangePasswordForm(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        
+        String username = authentication.getName();
+        Optional<Account> accountOpt = accountRepository.findByUsername(username);
+        if (accountOpt.isEmpty()) {
+            model.addAttribute("errorMessage", "Account not found");
+            return "redirect:/profile";
+        }
+        
+        model.addAttribute("account", accountOpt.get());
+        model.addAttribute("changePasswordDto", new ChangePasswordDto());
+        return "profile/change-password";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(Authentication authentication,
+                                 @Valid @ModelAttribute("changePasswordDto") ChangePasswordDto dto,
+                                 BindingResult result,
+                                 Model model,
+                                 RedirectAttributes redirectAttributes) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        
+        String username = authentication.getName();
+        Optional<Account> accountOpt = accountRepository.findByUsername(username);
+        if (accountOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Account not found");
+            return "redirect:/profile";
+        }
+        
+        Account account = accountOpt.get();
+        model.addAttribute("account", account);
+        
+        // Validate confirm password matches
+        if (!result.hasFieldErrors("newPassword") && !result.hasFieldErrors("confirmPassword")) {
+            if (dto.getNewPassword() != null && dto.getConfirmPassword() != null 
+                    && !dto.getNewPassword().equals(dto.getConfirmPassword())) {
+                result.rejectValue("confirmPassword", "error.confirmPassword", "New password and confirm password do not match");
+            }
+        }
+        
+        if (result.hasErrors()) {
+            return "profile/change-password";
+        }
+        
+        try {
+            accountService.changePassword(account.getId(), dto);
+            redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully. Please login again.");
+            return "redirect:/logout";
+        } catch (IllegalArgumentException e) {
+            result.rejectValue("currentPassword", "error.currentPassword", e.getMessage());
+            return "profile/change-password";
+        }
+    }
+    
+    @GetMapping("/edit")
+    @Transactional(readOnly = true)
+    public String showEditProfileForm(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        
+        String username = authentication.getName();
+        Optional<Account> accountOpt = accountRepository.findByUsername(username);
+        if (accountOpt.isEmpty()) {
+            model.addAttribute("errorMessage", "Account not found");
+            return "redirect:/profile";
+        }
+        
+        Account account = accountOpt.get();
+        Optional<Employee> employeeOpt = employeeRepository.findByAccountId(account.getId());
+        if (employeeOpt.isEmpty()) {
+            model.addAttribute("errorMessage", "Employee profile not found");
+            return "redirect:/profile";
+        }
+        
+        Employee employee = employeeOpt.get();
+        EmployeeRegistrationDto dto = new EmployeeRegistrationDto();
+        dto.setFullName(employee.getFullName());
+        dto.setBirthDate(employee.getBirthDate());
+        dto.setGender(employee.getGender());
+        dto.setPhone(employee.getPhone());
+        dto.setAddress(employee.getAddress());
+        dto.setDepartmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null);
+        dto.setUsername(account.getUsername());
+        dto.setEmail(account.getEmail());
+        
+        List<Department> departments = departmentRepository.findAll();
+        model.addAttribute("employeeDto", dto);
+        model.addAttribute("employeeId", employee.getId());
+        model.addAttribute("departments", departments);
+        model.addAttribute("genders", Gender.values());
+        model.addAttribute("formAction", "/profile/update");
+        
+        return "profile/edit";
+    }
+    
+    @PostMapping("/update")
+    public String updateProfile(Authentication authentication,
+                               @Valid @ModelAttribute("employeeDto") EmployeeRegistrationDto dto,
+                               BindingResult result,
+                               Model model,
+                               RedirectAttributes redirectAttributes) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        
+        String username = authentication.getName();
+        Optional<Account> accountOpt = accountRepository.findByUsername(username);
+        if (accountOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Account not found");
+            return "redirect:/profile";
+        }
+        
+        Account account = accountOpt.get();
+        Optional<Employee> employeeOpt = employeeRepository.findByAccountId(account.getId());
+        if (employeeOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Employee profile not found");
+            return "redirect:/profile";
+        }
+        
+        Employee employee = employeeOpt.get();
+        
+        // Employee can only edit personal info, not username, email, or department
+        // Keep original username and email
+        dto.setUsername(account.getUsername());
+        dto.setEmail(account.getEmail());
+        // Keep original department
+        dto.setDepartmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null);
+        
+        if (result.hasErrors()) {
+            List<Department> departments = departmentRepository.findAll();
+            model.addAttribute("departments", departments);
+            model.addAttribute("genders", Gender.values());
+            model.addAttribute("employeeId", employee.getId());
+            model.addAttribute("formAction", "/profile/update");
+            return "profile/edit";
+        }
+        
+        try {
+            employeeService.update(employee.getId(), dto);
+            redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            List<Department> departments = departmentRepository.findAll();
+            model.addAttribute("departments", departments);
+            model.addAttribute("genders", Gender.values());
+            model.addAttribute("employeeId", employee.getId());
+            model.addAttribute("formAction", "/profile/update");
+            return "profile/edit";
+        }
+        
+        return "redirect:/profile";
+    }
+}
+

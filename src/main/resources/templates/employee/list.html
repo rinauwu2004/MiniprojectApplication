@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{employee.title}">Employees</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-users"></i> <span th:text="#{employee.title}">Employee Management</span></h5>
+                <a th:href="@{/employees/new}" class="btn btn-light btn-sm">
+                    <i class="fas fa-plus"></i> <span th:text="#{employee.new}">Add New Employee</span>
+                </a>
+            </div>
+            <div class="card-body">
+                <!-- Search Form -->
+                <form th:action="@{/employees}" method="get" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="keyword" class="form-label" th:text="#{employee.search.by.name}">Search by Name</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="keyword" 
+                                   name="keyword" 
+                                   th:value="${keyword}"
+                                   th:placeholder="#{form.placeholder.employee.name}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="departmentId" class="form-label" th:text="#{employee.filter.department}">Filter by Department</label>
+                            <select class="form-select" id="departmentId" name="departmentId">
+                                <option value="" th:text="#{employee.all.departments}">All Departments</option>
+                                <option th:each="dept : ${departments}" 
+                                        th:value="${dept.id}" 
+                                        th:text="${dept.name}"
+                                        th:selected="${departmentId != null and departmentId == dept.id}">
+                                    IT
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="fas fa-search"></i> <span th:text="#{common.search}">Search</span>
+                            </button>
+                            <a th:href="@{/employees}" class="btn btn-secondary">
+                                <i class="fas fa-redo"></i> <span th:text="#{common.reset}">Reset</span>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Employee List -->
+                <div th:if="${employees == null or employees.isEmpty()}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> <span th:text="#{employee.no.employees}">No employees found.</span>
+                </div>
+                <div th:if="${employees != null and !employees.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{common.id}">ID</th>
+                                    <th th:text="#{employee.full.name}">Full Name</th>
+                                    <th th:text="#{user.email}">Email</th>
+                                    <th th:text="#{employee.phone}">Phone</th>
+                                    <th th:text="#{employee.department}">Department</th>
+                                    <th th:text="#{employee.gender}">Gender</th>
+                                    <th th:text="#{common.actions}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="emp : ${employees}">
+                                    <td th:text="${emp.id}">1</td>
+                                    <td>
+                                        <strong th:text="${emp.fullName}">John Doe</strong>
+                                    </td>
+                                    <td th:text="${emp.account.email}">john.doe@example.com</td>
+                                    <td th:text="${emp.phone}">0123456789</td>
+                                    <td>
+                                        <span th:if="${emp.department != null}" 
+                                              th:text="${emp.department.name}" 
+                                              class="badge bg-info">IT</span>
+                                        <span th:unless="${emp.department != null}" class="text-muted">N/A</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${emp.gender}" class="badge bg-secondary">Male</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/employees/{id}/edit(id=${emp.id})}" 
+                                           class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
+                                        </a>
+                                        <a th:href="@{/employees/{id}/change-password(id=${emp.id})}" 
+                                           sec:authorize="hasRole('ADMIN')"
+                                           class="btn btn-sm btn-warning me-1">
+                                            <i class="fas fa-key"></i> <span th:text="#{employee.change.password}">Change Password</span>
+                                        </a>
+                                        <form th:action="@{/employees/{id}/delete(id=${emp.id})}" 
+                                              method="post" 
+                                              style="display: inline;"
+                                              th:onsubmit="'return confirm(\'' + #{common.confirm.delete.employee} + '\');'">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" 
+                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage - 1})}">
+                                    <span th:text="#{common.previous}">Previous</span>
+                                </a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                class="page-item" 
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${i})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" 
+                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage + 1})}">
+                                    <span th:text="#{common.next}">Next</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                    <div class="text-muted text-center mt-2">
+                        <span th:text="#{common.showing}">Showing</span> <span th:text="${totalItems}">0</span> <span th:text="#{common.total}">total</span> <span th:text="#{employee.list}">employees</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

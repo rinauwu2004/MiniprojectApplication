@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{project.title}">Projects</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-project-diagram"></i> <span th:text="#{project.title}">Project Management</span></h5>
+                <a th:href="@{/projects/new}" 
+                   sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
+                   class="btn btn-light btn-sm">
+                    <i class="fas fa-plus"></i> <span th:text="#{project.new}">Add New Project</span>
+                </a>
+            </div>
+            <div class="card-body">
+                <div th:if="${projects == null or projects.isEmpty()}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> <span th:text="#{project.no.projects}">No projects found. Create your first project!</span>
+                </div>
+                <div th:if="${projects != null and !projects.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{common.id}">ID</th>
+                                    <th th:text="#{project.name}">Project Name</th>
+                                    <th th:text="#{project.start.date}">Start Date</th>
+                                    <th th:text="#{project.end.date}">End Date</th>
+                                    <th th:text="#{project.status}">Status</th>
+                                    <th th:text="#{common.actions}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="project : ${projects}">
+                                    <td th:text="${project.id}">1</td>
+                                    <td>
+                                        <strong>
+                                            <a th:href="@{/projects/{id}(id=${project.id})}" 
+                                               th:text="${project.name}"
+                                               class="text-decoration-none">Project Name</a>
+                                        </strong>
+                                    </td>
+                                    <td th:text="${#temporals.format(project.startDate, 'yyyy-MM-dd')}">2024-01-01</td>
+                                    <td th:text="${#temporals.format(project.endDate, 'yyyy-MM-dd')}">2024-12-31</td>
+                                    <td>
+                                        <span th:switch="${project.status?.name()}" class="badge">
+                                            <span th:case="'Planning'" class="badge bg-secondary" th:text="#{status.planning}">Planning</span>
+                                            <span th:case="'Ongoing'" class="badge bg-primary" th:text="#{status.ongoing}">Ongoing</span>
+                                            <span th:case="'Completed'" class="badge bg-success" th:text="#{status.completed}">Completed</span>
+                                            <span th:case="*" class="badge bg-secondary" th:text="${project.status}">N/A</span>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/projects/{id}(id=${project.id})}" 
+                                           class="btn btn-sm btn-info me-1">
+                                            <i class="fas fa-eye"></i> <span th:text="#{common.view}">View</span>
+                                        </a>
+                                        <a th:href="@{/projects/{id}/edit(id=${project.id})}" 
+                                           sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
+                                           class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
+                                        </a>
+                                        <form th:action="@{/projects/{id}/delete(id=${project.id})}" 
+                                              sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
+                                              method="post" 
+                                              style="display: inline;"
+                                              th:onsubmit="'return confirm(\'' + #{common.confirm.delete.project} + '\');'">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination justify-content-center">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" 
+                                   th:href="@{/projects(page=${currentPage - 1})}">
+                                    <span th:text="#{common.previous}">Previous</span>
+                                </a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                class="page-item" 
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" 
+                                   th:href="@{/projects(page=${i})}"
+                                   th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" 
+                                   th:href="@{/projects(page=${currentPage + 1})}">
+                                    <span th:text="#{common.next}">Next</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                    
+                    <div class="text-muted text-center mt-2">
+                        <span th:text="#{common.showing}">Showing</span> <span th:text="${totalItems}">0</span> <span th:text="#{common.total}">total</span> <span th:text="#{project.list}">projects</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

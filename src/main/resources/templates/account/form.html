@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:if="${accountDto.id != null}" th:text="#{user.edit}">Edit User</title>
+    <title th:unless="${accountDto.id != null}" th:text="#{user.new}">New User</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-plus"></i> 
+                    <span th:if="${accountDto.id != null}" th:text="#{user.edit}">Edit User</span>
+                    <span th:unless="${accountDto.id != null}" th:text="#{user.create.new}">Create New User</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}">Error</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <form th:action="${formAction}" 
+                      th:object="${accountDto}" 
+                      method="post">
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="username" class="form-label">
+                                <span th:text="#{form.label.username}">Username</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   th:field="*{username}" 
+                                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"
+                                   th:placeholder="#{form.placeholder.username}"
+                                   th:disabled="${isAdminAccount != null and isAdminAccount}"
+                                   required
+                                   maxlength="50">
+                            <!-- Hidden field to preserve username value when disabled -->
+                            <input type="hidden" 
+                                   th:if="${isAdminAccount != null and isAdminAccount}"
+                                   th:name="username"
+                                   th:value="${accountDto.username}">
+                            <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{username}">Error</span>
+                            </div>
+                            <small th:if="${isAdminAccount != null and isAdminAccount}" class="form-text text-muted" th:text="#{user.admin.readonly}">Admin accounts: Username cannot be changed</small>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">
+                                <span th:text="#{form.label.email}">Email</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="email" 
+                                   class="form-control" 
+                                   id="email" 
+                                   th:field="*{email}" 
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                   th:placeholder="#{form.placeholder.email}"
+                                   th:disabled="${isAdminAccount != null and isAdminAccount}"
+                                   required
+                                   maxlength="100">
+                            <!-- Hidden field to preserve email value when disabled -->
+                            <input type="hidden" 
+                                   th:if="${isAdminAccount != null and isAdminAccount}"
+                                   th:name="email"
+                                   th:value="${accountDto.email}">
+                            <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{email}">Error</span>
+                            </div>
+                            <small th:if="${isAdminAccount != null and isAdminAccount}" class="form-text text-muted" th:text="#{user.admin.readonly}">Admin accounts: Email cannot be changed</small>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Password field only for new account -->
+                        <div class="col-md-6 mb-3" th:if="${accountDto.id == null}">
+                            <label for="password" class="form-label">
+                                <span th:text="#{form.label.password}">Password</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password" 
+                                   th:field="*{password}" 
+                                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                                   th:placeholder="#{form.placeholder.password}"
+                                   required>
+                            <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{password}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3" th:classappend="${accountDto.id == null} ? '' : 'col-md-12'">
+                            <label for="status" class="form-label">
+                                <span th:text="#{form.label.status}">Status</span> <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" 
+                                    id="status" 
+                                    th:field="*{status}"
+                                    th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''"
+                                    required>
+                                <option value="" th:text="#{form.select.status}">-- Select Status --</option>
+                                <option th:each="statusOption : ${statuses}"
+                                        th:value="${statusOption}"
+                                        th:text="#{'status.' + __${#strings.toLowerCase(statusOption)}__}">Active</option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('status')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{status}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">
+                            <span th:text="#{form.label.roles}">Roles</span> <span class="text-danger">*</span>
+                        </label>
+                        <div th:classappend="${#fields.hasErrors('roleIds')} ? 'is-invalid' : ''">
+                            <div th:each="role : ${roles}" class="form-check">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       th:id="'role_' + ${role.id}"
+                                       th:value="${role.id}"
+                                       th:field="*{roleIds}"
+                                       th:disabled="${isAdminAccount != null and isAdminAccount}">
+                                <label class="form-check-label" th:for="'role_' + ${role.id}">
+                                    <span th:if="${role.name == 'ADMIN'}" class="badge bg-danger" th:text="#{role.admin}">ADMIN</span>
+                                    <span th:if="${role.name == 'MANAGER'}" class="badge bg-warning text-dark" th:text="#{role.manager}">MANAGER</span>
+                                    <span th:if="${role.name == 'EMPLOYEE'}" class="badge bg-info" th:text="#{role.employee}">EMPLOYEE</span>
+                                </label>
+                            </div>
+                            <!-- Hidden fields to preserve roleIds values when disabled -->
+                            <div th:if="${isAdminAccount != null and isAdminAccount}">
+                                <input type="hidden" 
+                                       th:each="roleId : ${accountDto.roleIds}"
+                                       th:name="roleIds"
+                                       th:value="${roleId}">
+                            </div>
+                        </div>
+                        <div th:if="${#fields.hasErrors('roleIds')}" class="invalid-feedback d-block">
+                            <i class="fas fa-exclamation-circle"></i> <span th:errors="*{roleIds}">Error</span>
+                        </div>
+                        <small th:if="${isAdminAccount != null and isAdminAccount}" class="form-text text-muted" th:text="#{user.admin.readonly.roles}">Admin accounts: Roles cannot be changed</small>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a th:href="@{/accounts}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> <span th:text="#{user.back.to.list}">Back to List</span>
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> 
+                            <span th:if="${accountDto.id != null}" th:text="#{user.update}">Update User</span>
+                            <span th:unless="${accountDto.id != null}" th:text="#{user.create}">Create User</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+

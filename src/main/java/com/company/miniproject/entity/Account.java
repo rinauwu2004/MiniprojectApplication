@@ -1,11 +1,8 @@
 package com.company.miniproject.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,6 +11,7 @@ import java.util.Set;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = {"roles", "employee"})
 @EqualsAndHashCode(exclude = {"roles", "employee"})
 public class Account {
@@ -29,7 +27,7 @@ public class Account {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "email", unique = true, nullable = false, length = 255)
+    @Column(name = "email", unique = true, nullable = false)
     private String email;
 
     @Enumerated(EnumType.STRING)

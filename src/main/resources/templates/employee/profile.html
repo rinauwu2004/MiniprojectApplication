@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title>My Profile</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i> My Profile
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${employee != null}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%">Full Name:</th>
+                                    <td th:text="${employee.fullName}">John Doe</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td th:text="${employee.account.email}">john.doe@example.com</td>
+                                </tr>
+                                <tr>
+                                    <th>Username:</th>
+                                    <td th:text="${employee.account.username}">johndoe</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone:</th>
+                                    <td th:text="${employee.phone}">0123456789</td>
+                                </tr>
+                                <tr>
+                                    <th>Birth Date:</th>
+                                    <td th:text="${#temporals.format(employee.birthDate, 'yyyy-MM-dd')}">1990-01-01</td>
+                                </tr>
+                                <tr>
+                                    <th>Gender:</th>
+                                    <td>
+                                        <span th:text="${employee.gender}" class="badge bg-secondary">Male</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Address:</th>
+                                    <td th:text="${employee.address ?: 'N/A'}">123 Main St</td>
+                                </tr>
+                                <tr>
+                                    <th>Department:</th>
+                                    <td>
+                                        <span th:if="${employee.department != null}" 
+                                              th:text="${employee.department.name}" 
+                                              class="badge bg-info">IT</span>
+                                        <span th:unless="${employee.department != null}" class="text-muted">N/A</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Show assigned projects if any -->
+                    <div th:if="${assignments != null and !assignments.isEmpty()}" class="mt-4">
+                        <h6 class="mb-3"><i class="fas fa-project-diagram"></i> Assigned Projects</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Project</th>
+                                        <th>Role</th>
+                                        <th>Join Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="assignment : ${assignments}">
+                                        <td>
+                                            <a th:href="@{/projects/{id}(id=${assignment.project.id})}" 
+                                               th:text="${assignment.project.name}">Project Name</a>
+                                        </td>
+                                        <td><span class="badge bg-primary" th:text="${assignment.roleInProject}">Developer</span></td>
+                                        <td th:text="${#temporals.format(assignment.joinDate, 'yyyy-MM-dd')}">2024-01-01</td>
+                                        <td>
+                                            <span th:switch="${assignment.project.status?.name()}" class="badge">
+                                                <span th:case="'Planning'" class="badge bg-secondary">Planning</span>
+                                                <span th:case="'Ongoing'" class="badge bg-primary">Ongoing</span>
+                                                <span th:case="'Completed'" class="badge bg-success">Completed</span>
+                                                <span th:case="*" class="badge bg-secondary" th:text="${assignment.project.status}">N/A</span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${errorMessage != null}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+                </div>
+                <div th:if="${employee == null and errorMessage == null}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Profile information not available.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title layout:title-pattern="$CONTENT_TITLE - HR Management System">HR Management System</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .navbar-nav .nav-link {
+            color: rgba(255,255,255,0.9) !important;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+        }
+        
+        .navbar-nav .nav-link.active {
+            color: white !important;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 2rem 0;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .table {
+            background: white;
+        }
+        
+        .table thead {
+            background-color: #f8f9fa;
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: #f1f3f5;
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 1.5rem 0;
+            margin-top: auto;
+        }
+        
+        .badge {
+            padding: 0.5em 0.75em;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .pagination {
+            margin-top: 1rem;
+        }
+        
+        .page-link {
+            color: var(--primary-color);
+        }
+        
+        .page-link:hover {
+            color: var(--secondary-color);
+        }
+        
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border-color: var(--primary-color);
+        }
+    </style>
+    
+    <layout:head>
+        <!-- Additional head content from pages -->
+    </layout:head>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="fas fa-users-cog"></i> HR Management
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/accounts}">
+                            <i class="fas fa-users-cog"></i> <span th:text="#{nav.users}">Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+                        <a class="nav-link" th:href="@{/departments}">
+                            <i class="fas fa-building"></i> <span th:text="#{nav.departments}">Departments</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasRole('MANAGER')">
+                        <a class="nav-link" th:href="@{/employees}">
+                            <i class="fas fa-users"></i> <span th:text="#{nav.employees}">Employees</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">
+                        <a class="nav-link" th:href="@{/projects}">
+                            <i class="fas fa-project-diagram"></i> <span th:text="#{nav.projects}">Projects</span>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- Language Switcher -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="langDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-language"></i> <span th:text="#{lang.switch}">Language</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="langDropdown">
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="changeLanguage('en'); return false;">
+                                    <img th:src="@{/images/united-kingdom.png}" alt="English" style="width: 20px; height: 20px; margin-right: 8px;" onerror="this.style.display='none'">
+                                    <span th:text="#{lang.en}">English</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="changeLanguage('vi'); return false;">
+                                    <img th:src="@{/images/vietnam.png}" alt="Vietnamese" style="width: 20px; height: 20px; margin-right: 8px;" onerror="this.style.display='none'">
+                                    <span th:text="#{lang.vi}">Vietnamese</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> 
+                            <span sec:authentication="name"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><span class="dropdown-item-text">
+                                <small sec:authorize="hasRole('ADMIN')" class="badge bg-danger">ADMIN</small>
+                                <small sec:authorize="hasRole('MANAGER')" class="badge bg-warning text-dark">MANAGER</small>
+                                <small sec:authorize="hasRole('EMPLOYEE')" class="badge bg-info">EMPLOYEE</small>
+                            </span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" th:href="@{/profile}">
+                                    <i class="fas fa-user"></i> <span th:text="#{nav.my.profile}">My Profile</span>
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post" style="display: inline;">
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sign-out-alt"></i> <span th:text="#{nav.logout}">Logout</span>
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container-fluid">
+             <!-- Flash Messages -->
+             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                 <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" th:aria-label="#{common.close}"></button>
+             </div>
+             <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                 <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+                 <button type="button" class="btn-close" data-bs-dismiss="alert" th:aria-label="#{common.close}"></button>
+             </div>
+            
+            <div layout:fragment="body">
+                <!-- Page content will be inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-auto">
+        <div class="container-fluid text-center">
+            <p class="mb-0">&copy; 2025 HR Management System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function changeLanguage(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+    </script>
+    <layout:block name="scripts">
+        <!-- Additional scripts from pages -->
+    </layout:block>
+</body>
+</html>
+

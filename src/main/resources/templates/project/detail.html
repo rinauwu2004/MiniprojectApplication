@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{project.detail}">Project Details</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <!-- Project Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-project-diagram"></i> 
+                    <span th:text="${project.name}">Project Name</span>
+                </h5>
+                <div>
+                    <a th:href="@{/projects/{id}/edit(id=${project.id})}" 
+                       sec:authorize="hasRole('ADMIN')"
+                       class="btn btn-sm btn-primary me-2">
+                        <i class="fas fa-edit"></i> <span th:text="#{project.edit.project}">Edit Project</span>
+                    </a>
+                    <a th:href="@{/projects}" 
+                       sec:authorize="hasRole('ADMIN')"
+                       class="btn btn-sm btn-secondary me-2">
+                        <i class="fas fa-arrow-left"></i> <span th:text="#{project.back.to.list}">Back to List</span>
+                    </a>
+                    <a th:href="@{/employee/projects}" 
+                       sec:authorize="hasRole('EMPLOYEE') and !hasAnyRole('ADMIN', 'MANAGER')"
+                       class="btn btn-sm btn-secondary">
+                        <i class="fas fa-arrow-left"></i> <span th:text="#{project.back.to.my.projects}">Back to My Projects</span>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%" th:text="#{project.name} + ':'">Project Name:</th>
+                                <td th:text="${project.name}">Project Name</td>
+                            </tr>
+                            <tr>
+                                <th th:text="#{project.start.date} + ':'">Start Date:</th>
+                                <td th:text="${project.startDate != null ? #temporals.format(project.startDate, 'yyyy-MM-dd') : 'N/A'}">2024-01-01</td>
+                            </tr>
+                            <tr>
+                                <th th:text="#{project.end.date} + ':'">End Date:</th>
+                                <td th:text="${project.endDate != null ? #temporals.format(project.endDate, 'yyyy-MM-dd') : 'N/A'}">2024-12-31</td>
+                            </tr>
+                                <tr>
+                                    <th th:text="#{project.status} + ':'">Status:</th>
+                                    <td>
+                                        <span th:switch="${project.status?.name()}" class="badge">
+                                            <span th:case="'Planning'" class="badge bg-secondary" th:text="#{status.planning}">Planning</span>
+                                            <span th:case="'Ongoing'" class="badge bg-primary" th:text="#{status.ongoing}">Ongoing</span>
+                                            <span th:case="'Completed'" class="badge bg-success" th:text="#{status.completed}">Completed</span>
+                                            <span th:case="*" class="badge bg-secondary" th:text="${project.status}">N/A</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Member Form (Admin and Manager) -->
+        <div class="card mb-4" sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-user-plus"></i> <span th:text="#{project.add.member.to}">Add Member to Project</span></h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/projects/{id}/assignments(id=${project.id})}" 
+                      th:object="${assignmentDto}" 
+                      method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="employeeId" class="form-label">
+                                <span th:text="#{form.label.select.employee}">Select Employee</span> <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="employeeId" th:field="*{employeeId}" required>
+                                <option value="" th:text="#{form.select.employee}">Select Employee</option>
+                                <option th:each="emp : ${allEmployees}" 
+                                        th:value="${emp.id}" 
+                                        th:text="${emp.fullName + ' - ' + (emp.department != null ? emp.department.name : 'N/A')}">
+                                    John Doe - IT
+                                </option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('employeeId')}" class="text-danger">
+                                <span th:errors="*{employeeId}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="roleInProject" class="form-label">
+                                <span th:text="#{form.label.role.in.project}">Role in Project</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="roleInProject" 
+                                   th:field="*{roleInProject}" 
+                                   th:placeholder="#{form.placeholder.role.in.project}"
+                                   required
+                                   maxlength="30">
+                            <div th:if="${#fields.hasErrors('roleInProject')}" class="text-danger">
+                                <span th:errors="*{roleInProject}">Error</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="joinDate" class="form-label">
+                                <span th:text="#{form.label.join.date}">Join Date</span> <span class="text-danger">*</span>
+                            </label>
+                            <input type="date" 
+                                   class="form-control" 
+                                   id="joinDate" 
+                                   th:field="*{joinDate}"
+                                   th:classappend="${#fields.hasErrors('joinDate')} ? 'is-invalid' : ''"
+                                   required>
+                            <div th:if="${#fields.hasErrors('joinDate')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle"></i> <span th:errors="*{joinDate}">Error</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> <span th:text="#{project.add.member}">Add Member</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Project Members List -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-users"></i> <span th:text="#{project.members.list}">Project Members</span></h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${assignments == null or assignments.isEmpty()}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> <span th:text="#{project.no.members}">No members assigned to this project yet.</span>
+                </div>
+                <div th:if="${assignments != null and !assignments.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{project.employee.name}">Employee Name</th>
+                                    <th th:text="#{employee.department}">Department</th>
+                                    <th th:text="#{project.role.in.project}">Role in Project</th>
+                                    <th th:text="#{project.join.date}">Join Date</th>
+                                    <th th:text="#{common.actions}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="assignment : ${assignments}">
+                                    <td>
+                                        <strong th:text="${assignment.employee.fullName}">John Doe</strong>
+                                    </td>
+                                    <td>
+                                        <span th:if="${assignment.employee.department != null}" 
+                                              th:text="${assignment.employee.department.name}" 
+                                              class="badge bg-info">IT</span>
+                                        <span th:unless="${assignment.employee.department != null}" class="text-muted">N/A</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary" th:text="${assignment.roleInProject}">Developer</span>
+                                    </td>
+                                    <td th:text="${#temporals.format(assignment.joinDate, 'yyyy-MM-dd')}">2024-01-01</td>
+                                    <td>
+                                        <form th:action="@{/projects/assignments/{assignmentId}/delete(assignmentId=${assignment.id}, projectId=${project.id})}" 
+                                              sec:authorize="hasRole('ADMIN')"
+                                              method="post" 
+                                              style="display: inline;"
+                                              th:onsubmit="'return confirm(\'' + #{project.remove.member.confirm} + '\');'">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> <span th:text="#{project.remove.member}">Remove</span>
+                                            </button>
+                                        </form>
+                                        <span sec:authorize="hasRole('EMPLOYEE') and !hasAnyRole('ADMIN', 'MANAGER')" class="text-muted">-</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

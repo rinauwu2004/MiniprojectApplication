@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{profile.title}">My Profile</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user"></i> <span th:text="#{profile.title}">My Profile</span>
+                </h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${account != null}">
+                    <h6 class="mb-3 text-primary"><i class="fas fa-key"></i> <span th:text="#{profile.account.info}">Account Information</span></h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="40%"><span th:text="#{user.username}">Username</span>:</th>
+                                    <td th:text="${account.username}">admin1</td>
+                                </tr>
+                                <tr>
+                                    <th><span th:text="#{user.email}">Email</span>:</th>
+                                    <td th:text="${account.email}">admin1@company.com</td>
+                                </tr>
+                                <tr>
+                                    <th><span th:text="#{common.status}">Status</span>:</th>
+                                    <td>
+                                        <span th:switch="${account.status?.name()}" class="badge">
+                                            <span th:case="'Active'" class="badge bg-success">
+                                                <i class="fas fa-check-circle"></i> <span th:text="#{status.active}">Active</span>
+                                            </span>
+                                            <span th:case="'Blocked'" class="badge bg-danger">
+                                                <i class="fas fa-ban"></i> <span th:text="#{status.blocked}">Blocked</span>
+                                            </span>
+                                            <span th:case="*" class="badge bg-secondary" th:text="${account.status}">Unknown</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><span th:text="#{user.roles}">Roles</span>:</th>
+                                    <td>
+                                        <span th:each="role : ${account.roles}" class="badge me-1">
+                                            <span th:if="${role.name == 'ADMIN'}" class="badge bg-danger" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">ADMIN</span>
+                                            <span th:if="${role.name == 'MANAGER'}" class="badge bg-warning text-dark" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">MANAGER</span>
+                                            <span th:if="${role.name == 'EMPLOYEE'}" class="badge bg-info" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">EMPLOYEE</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Change Password and Edit Profile Buttons -->
+                    <div class="mt-3">
+                        <a th:href="@{/profile/change-password}" class="btn btn-warning">
+                            <i class="fas fa-key"></i> <span th:text="#{profile.change.password}">Change Password</span>
+                        </a>
+                        <a th:if="${employee != null}" th:href="@{/profile/edit}" class="btn btn-primary ms-2">
+                            <i class="fas fa-edit"></i> <span th:text="#{profile.edit}">Edit Profile</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Employee Information (if exists) -->
+                    <div th:if="${employee != null}" class="mt-4">
+                        <hr>
+                        <h6 class="mb-3 text-primary"><i class="fas fa-user"></i> <span th:text="#{profile.employee.info}">Employee Information</span></h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <th width="40%"><span th:text="#{employee.full.name}">Full Name</span>:</th>
+                                        <td th:text="${employee.fullName}">John Doe</td>
+                                    </tr>
+                                    <tr>
+                                        <th><span th:text="#{employee.phone}">Phone</span>:</th>
+                                        <td th:text="${employee.phone}">0123456789</td>
+                                    </tr>
+                                    <tr>
+                                        <th><span th:text="#{employee.birth.date}">Birth Date</span>:</th>
+                                        <td th:text="${#temporals.format(employee.birthDate, 'yyyy-MM-dd')}">1990-01-01</td>
+                                    </tr>
+                                    <tr>
+                                        <th><span th:text="#{employee.gender}">Gender</span>:</th>
+                                        <td>
+                                            <span class="badge bg-secondary" th:text="#{'gender.' + __${#strings.toLowerCase(employee.gender)}__}">Male</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th><span th:text="#{employee.address}">Address</span>:</th>
+                                        <td th:text="${employee.address ?: 'N/A'}">123 Main St</td>
+                                    </tr>
+                                    <tr>
+                                        <th><span th:text="#{employee.department}">Department</span>:</th>
+                                        <td>
+                                            <span th:if="${employee.department != null}" 
+                                                  th:text="${employee.department.name}" 
+                                                  class="badge bg-info">IT</span>
+                                            <span th:unless="${employee.department != null}" class="text-muted">N/A</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${errorMessage != null}" class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{fragments/layout}">
+<head>
+    <title th:text="#{department.title}">Departments</title>
+</head>
+<body>
+    <div layout:fragment="body">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-building"></i> <span th:text="#{department.title}">Department Management</span></h5>
+                <a th:href="@{/departments/new}" 
+                   sec:authorize="hasRole('ADMIN')"
+                   class="btn btn-light btn-sm">
+                    <i class="fas fa-plus"></i> <span th:text="#{department.new}">Add New Department</span>
+                </a>
+            </div>
+            <div class="card-body">
+                <div th:if="${departments != null and departments.isEmpty()}" class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> <span th:text="#{department.no.departments}">No departments found. Create your first department!</span>
+                </div>
+                <div th:if="${departments != null and !departments.isEmpty()}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th th:text="#{common.id}">ID</th>
+                                    <th th:text="#{common.name}">Name</th>
+                                    <th th:text="#{common.description}">Description</th>
+                                    <th th:text="#{department.employees}">Employees</th>
+                                    <th th:text="#{common.actions}">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="dept : ${departments}">
+                                    <td th:text="${dept.id}">1</td>
+                                    <td>
+                                        <strong>
+                                            <a th:href="@{/departments/{id}(id=${dept.id})}" 
+                                               th:text="${dept.name}"
+                                               class="text-decoration-none">IT</a>
+                                        </strong>
+                                    </td>
+                                    <td th:text="${dept.description ?: 'N/A'}">Information Technology Department</td>
+                                    <td>
+                                        <span class="badge bg-info me-1" th:text="${dept.employees != null ? #lists.size(dept.employees) : 0}">0</span>
+                                        <span class="text-muted" th:text="#{department.employee.count}">employees</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/departments/{id}(id=${dept.id})}" 
+                                           class="btn btn-sm btn-info me-1">
+                                            <i class="fas fa-eye"></i> <span th:text="#{common.view}">View</span>
+                                        </a>
+                                        <a th:href="@{/departments/{id}/edit(id=${dept.id})}" 
+                                           sec:authorize="hasRole('ADMIN')"
+                                           class="btn btn-sm btn-primary me-1">
+                                            <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
+                                        </a>
+                                        <form th:action="@{/departments/{id}/delete(id=${dept.id})}" 
+                                              sec:authorize="hasRole('ADMIN')"
+                                              method="post" 
+                                              style="display: inline;"
+                                              th:onsubmit="'return confirm(\'' + #{common.confirm.delete.department} + '\');'">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

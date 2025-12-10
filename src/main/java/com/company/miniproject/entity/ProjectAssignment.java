@@ -1,11 +1,8 @@
 package com.company.miniproject.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+
 import java.time.LocalDate;
 
 @Entity
@@ -15,6 +12,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @ToString(exclude = {"project", "employee"})
 @EqualsAndHashCode(exclude = {"project", "employee"})
 public class ProjectAssignment {
