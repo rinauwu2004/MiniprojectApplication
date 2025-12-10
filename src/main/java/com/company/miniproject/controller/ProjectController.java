@@ -45,7 +45,6 @@ public class ProjectController {
             Pageable pageable = PageRequest.of(page, size);
             Page<Project> projectPage;
             
-            // Check if user is EMPLOYEE (and not ADMIN/MANAGER) - only show assigned projects
             boolean isEmployeeOnly = authentication != null && 
                     authentication.getAuthorities().stream()
                             .anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYEE")) &&
@@ -53,8 +52,7 @@ public class ProjectController {
                             .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || 
                                          a.getAuthority().equals("ROLE_MANAGER"));
             
-            if (isEmployeeOnly) {
-                // Find employee by account
+            if (isEmployeeOnly && authentication != null) {
                 String username = authentication.getName();
                 Optional<Account> accountOpt = accountRepository.findByUsername(username);
                 if (accountOpt.isPresent()) {
@@ -62,14 +60,12 @@ public class ProjectController {
                     if (employeeOpt.isPresent()) {
                         projectPage = projectService.findByEmployeeId(employeeOpt.get().getId(), pageable);
                     } else {
-                        // No employee record, show empty list
                         projectPage = new PageImpl<>(List.of(), pageable, 0);
                     }
                 } else {
                     projectPage = new PageImpl<>(List.of(), pageable, 0);
                 }
             } else {
-                // ADMIN and MANAGER see all projects
                 projectPage = projectService.findAll(pageable);
             }
             
@@ -99,7 +95,6 @@ public class ProjectController {
                                BindingResult result,
                                Model model,
                                RedirectAttributes redirectAttributes) {
-        // Custom validation: endDate must be after startDate
         if (project.getStartDate() != null && project.getEndDate() != null) {
             if (project.getEndDate().isBefore(project.getStartDate()) || 
                 project.getEndDate().isEqual(project.getStartDate())) {
@@ -139,7 +134,6 @@ public class ProjectController {
         model.addAttribute("assignments", assignments);
         model.addAttribute("statuses", ProjectStatus.values());
         
-        // Load employees list for ADMIN and MANAGER (for adding members) with department eagerly fetched
         if (authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_MANAGER"))) {
             List<Employee> allEmployees = employeeRepository.findAllWithDepartment();
@@ -166,7 +160,6 @@ public class ProjectController {
                                BindingResult result,
                                Model model,
                                RedirectAttributes redirectAttributes) {
-        // Custom validation: endDate must be after startDate
         if (project.getStartDate() != null && project.getEndDate() != null) {
             if (project.getEndDate().isBefore(project.getStartDate()) || 
                 project.getEndDate().isEqual(project.getStartDate())) {
@@ -213,10 +206,8 @@ public class ProjectController {
                                      Model model,
                                      Authentication authentication,
                                      RedirectAttributes redirectAttributes) {
-        // Set projectId from path variable (not from form)
         dto.setProjectId(id);
         
-        // Always load project and assignments for the view
         Project project = projectService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + id));
         List<ProjectAssignment> assignments = projectService.getProjectAssignments(id);
@@ -224,7 +215,6 @@ public class ProjectController {
         model.addAttribute("assignments", assignments);
         model.addAttribute("statuses", ProjectStatus.values());
         
-        // Load employees list for ADMIN/MANAGER with department eagerly fetched
         if (authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_MANAGER"))) {
             List<Employee> allEmployees = employeeRepository.findAllWithDepartment();
@@ -232,17 +222,14 @@ public class ProjectController {
         }
         
         if (result.hasErrors()) {
-            // Keep the DTO with entered values and errors for display
             model.addAttribute("assignmentDto", dto);
             
-            // Build detailed error message for flash attribute (if needed)
             StringBuilder errorMsg = new StringBuilder("Please fix the following errors: ");
             result.getFieldErrors().forEach(error -> {
                 errorMsg.append(error.getField()).append(" - ").append(error.getDefaultMessage()).append(". ");
             });
             model.addAttribute("errorMessage", errorMsg.toString().trim());
             
-            // Return the view directly to show validation errors on the form
             return "project/detail";
         }
         
@@ -252,8 +239,7 @@ public class ProjectController {
             projectService.addProjectAssignment(dto);
             redirectAttributes.addFlashAttribute("successMessage", "Employee assigned to project successfully");
         } catch (IllegalArgumentException e) {
-            // If service throws exception, reload the form with error
-            model.addAttribute("assignmentDto", new ProjectAssignmentDto()); // Reset form
+            model.addAttribute("assignmentDto", new ProjectAssignmentDto());
             model.addAttribute("errorMessage", e.getMessage());
             return "project/detail";
         }

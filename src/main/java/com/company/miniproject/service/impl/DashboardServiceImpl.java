@@ -39,25 +39,20 @@ public class DashboardServiceImpl implements DashboardService {
         boolean isManager = authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
         
-        // Admin sees all stats including total users
         if (isAdmin) {
             stats.put("totalDepartments", departmentRepository.count());
             stats.put("totalUsers", accountRepository.count()); // Total users instead of employees
             stats.put("totalProjects", projectRepository.count());
         }
         
-        // Manager sees employees count and departments
-        // Only count employees with EMPLOYEE role and Active status (exclude blocked accounts and users with multiple roles)
         if (isManager && !isAdmin) {
             stats.put("totalDepartments", departmentRepository.count());
-            // Count only employees with EMPLOYEE role and Active status
             long activeEmployeeCount = employeeRepository.countEmployeesByRoleAndStatus(
                 com.company.miniproject.entity.AccountStatus.Active);
             stats.put("totalEmployees", activeEmployeeCount);
             stats.put("totalProjects", projectRepository.count());
         }
         
-        // Employee sees their assigned projects count
         if (authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYEE"))) {
             String username = authentication.getName();

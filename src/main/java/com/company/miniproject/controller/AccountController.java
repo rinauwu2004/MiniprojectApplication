@@ -44,7 +44,6 @@ public class AccountController {
             Pageable pageable = PageRequest.of(page, size);
             Page<Account> accountPage;
             
-            // Use search method if any filter is applied
             if ((keyword != null && !keyword.trim().isEmpty()) || roleId != null || status != null) {
                 accountPage = accountService.searchAccounts(keyword, roleId, status, pageable);
             } else {
@@ -83,7 +82,6 @@ public class AccountController {
                                 BindingResult result,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
-        // Validate password for create
         if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
             result.rejectValue("password", "error.password", "Password is required");
         }
@@ -100,7 +98,6 @@ public class AccountController {
             accountService.save(dto);
             redirectAttributes.addFlashAttribute("successMessage", "Account created successfully");
         } catch (IllegalArgumentException e) {
-            // Parse error message and add to appropriate field
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.contains("Username already exists")) {
@@ -111,7 +108,6 @@ public class AccountController {
                     model.addAttribute("errorMessage", errorMsg);
                 }
             }
-            // Keep DTO to preserve form values
             model.addAttribute("accountDto", dto);
             List<Role> roles = roleRepository.findAll();
             model.addAttribute("roles", roles);
@@ -129,7 +125,6 @@ public class AccountController {
         Account account = accountService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + id));
         
-        // Allow admin to edit status of other admin accounts, but not roles or other fields
         boolean isAdminAccount = account.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         
@@ -141,7 +136,6 @@ public class AccountController {
         dto.setRoleIds(account.getRoles().stream()
                 .map(Role::getId)
                 .collect(Collectors.toSet()));
-        // Password is not set for edit
         
         List<Role> roles = roleRepository.findAll();
         model.addAttribute("accountDto", dto);
@@ -159,13 +153,11 @@ public class AccountController {
                                 BindingResult result,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
-        // Restore values for disabled fields (admin accounts) before validation
         Account account = accountService.findById(id).orElse(null);
         boolean isAdminAccount = account != null && account.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         
         if (isAdminAccount && account != null) {
-            // Restore username, email, and roles from database for admin accounts
             dto.setUsername(account.getUsername());
             dto.setEmail(account.getEmail());
             dto.setRoleIds(account.getRoles().stream()
@@ -186,7 +178,6 @@ public class AccountController {
             accountService.update(id, dto);
             redirectAttributes.addFlashAttribute("successMessage", "Account updated successfully");
         } catch (IllegalArgumentException e) {
-            // Parse error message and add to appropriate field
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.contains("Username already exists")) {
@@ -197,7 +188,6 @@ public class AccountController {
                     model.addAttribute("errorMessage", errorMsg);
                 }
             }
-            // Keep DTO to preserve form values
             model.addAttribute("accountDto", dto);
             model.addAttribute("isAdminAccount", isAdminAccount);
             List<Role> roles = roleRepository.findAll();
@@ -241,7 +231,6 @@ public class AccountController {
         Account account = accountService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + id));
         
-        // Check if account has ADMIN role - admin cannot change password of other admin accounts
         boolean isAdminAccount = account.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         if (isAdminAccount) {
@@ -265,7 +254,6 @@ public class AccountController {
         
         model.addAttribute("account", account);
         
-        // Validate confirm password matches
         if (!result.hasFieldErrors("newPassword") && !result.hasFieldErrors("confirmPassword")) {
             if (dto.getNewPassword() != null && dto.getConfirmPassword() != null 
                     && !dto.getNewPassword().equals(dto.getConfirmPassword())) {

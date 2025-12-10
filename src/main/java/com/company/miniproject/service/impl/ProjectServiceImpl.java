@@ -47,7 +47,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project save(Project project) {
-        // Validate end_date > start_date
         if (project.getStartDate() != null && project.getEndDate() != null) {
             if (project.getEndDate().isBefore(project.getStartDate()) || 
                 project.getEndDate().isEqual(project.getStartDate())) {
@@ -67,7 +66,6 @@ public class ProjectServiceImpl implements ProjectService {
         Project existingProject = projectRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + id));
         
-        // Validate end_date > start_date
         if (project.getStartDate() != null && project.getEndDate() != null) {
             if (project.getEndDate().isBefore(project.getStartDate()) || 
                 project.getEndDate().isEqual(project.getStartDate())) {
@@ -85,10 +83,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void deleteById(Integer id) {
-        Project project = projectRepository.findById(id)
+        projectRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + id));
         
-        // Project assignments will be cascade deleted
         projectRepository.deleteById(id);
     }
 
@@ -106,13 +103,11 @@ public class ProjectServiceImpl implements ProjectService {
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + dto.getEmployeeId()));
         
-        // Check if assignment already exists (duplicate check) - must be first
         if (projectAssignmentRepository.existsByProjectIdAndEmployeeId(
                 dto.getProjectId(), dto.getEmployeeId())) {
             throw new IllegalArgumentException("This employee is already assigned to this project");
         }
         
-        // Validate joinDate: cannot be after project end date or before project start date
         LocalDate joinDate = dto.getJoinDate() != null ? dto.getJoinDate() : LocalDate.now();
         if (project.getStartDate() != null && joinDate.isBefore(project.getStartDate())) {
             throw new IllegalArgumentException("Cannot add member before project start date. Please select a join date on or after the project start date.");
@@ -124,7 +119,6 @@ public class ProjectServiceImpl implements ProjectService {
         ProjectAssignment assignment = new ProjectAssignment();
         assignment.setProject(project);
         assignment.setEmployee(employee);
-        // Convert role in project to uppercase
         assignment.setRoleInProject(dto.getRoleInProject() != null ? dto.getRoleInProject().trim().toUpperCase() : null);
         assignment.setJoinDate(joinDate);
         
@@ -133,7 +127,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void removeProjectAssignment(Integer assignmentId) {
-        ProjectAssignment assignment = projectAssignmentRepository.findById(assignmentId)
+        projectAssignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Project assignment not found with id: " + assignmentId));
         
         projectAssignmentRepository.deleteById(assignmentId);

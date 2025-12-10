@@ -32,9 +32,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
                 .collect(Collectors.toList());
 
-        // Return User with disabled/accountLocked = true if blocked
-        // Spring Security will reject authentication and call failure handler
-        // The failure handler will check account status and display appropriate message
         boolean isBlocked = account.getStatus() == AccountStatus.Blocked;
         
         return User.builder()

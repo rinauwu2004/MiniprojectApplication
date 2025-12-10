@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ProjectAssignmentDto {
     
-    // projectId is set from path variable in controller, not from form
     private Integer projectId;
     
     @NotNull(message = "Employee is required")

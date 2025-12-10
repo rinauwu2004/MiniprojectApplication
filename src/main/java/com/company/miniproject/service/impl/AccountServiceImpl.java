@@ -59,7 +59,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account save(AccountDto dto) {
-        // Validate password for create
         if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
             throw new IllegalArgumentException("Password is required");
         }
@@ -67,7 +66,6 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("Password must be at least 6 characters");
         }
         
-        // Validate unique constraints with detailed error messages
         if (accountRepository.existsByUsername(dto.getUsername())) {
             throw new IllegalArgumentException("Username already exists. Please choose a different username.");
         }
@@ -75,14 +73,12 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("Email already exists. Please use a different email address.");
         }
         
-        // Create account
         Account account = new Account();
         account.setUsername(dto.getUsername());
         account.setEmail(dto.getEmail());
         account.setPassword(passwordEncoder.encode(dto.getPassword()));
         account.setStatus(dto.getStatus());
         
-        // Set roles
         Set<Role> roles = new HashSet<>();
         for (Integer roleId : dto.getRoleIds()) {
             Role role = roleRepository.findById(roleId)
@@ -99,28 +95,20 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + id));
         
-        // Check if account has ADMIN role
         boolean isAdminAccount = account.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         
-        // Validate unique constraints for update (excluding current account) with detailed error messages
-        // Check username uniqueness (only if username is being changed)
         if (dto.getUsername() != null && !dto.getUsername().trim().isEmpty()) {
             if (!account.getUsername().equals(dto.getUsername()) && accountRepository.existsByUsername(dto.getUsername())) {
                 throw new IllegalArgumentException("Username already exists. Please choose a different username.");
             }
         }
         
-        // Check email uniqueness (only if email is being changed)
         if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
-            // Normalize email (trim) for comparison
             String normalizedNewEmail = dto.getEmail().trim();
             String normalizedCurrentEmail = account.getEmail().trim();
             
-            // Check if email is different from current email (case-insensitive)
             if (!normalizedCurrentEmail.equalsIgnoreCase(normalizedNewEmail)) {
-                // Check if new email already exists for another account (case-insensitive)
-                // Find account with this email (case-insensitive)
                 Optional<Account> existingAccount = accountRepository.findByEmailIgnoreCase(normalizedNewEmail);
                 if (existingAccount.isPresent() && !existingAccount.get().getId().equals(id)) {
                     throw new IllegalArgumentException("Email already exists. This email is already used by another user. Please use a different email address.");
@@ -128,18 +116,13 @@ public class AccountServiceImpl implements AccountService {
             }
         }
         
-        // For admin accounts, allow status update (admin can edit status of other admin accounts)
         if (isAdminAccount) {
             account.setStatus(dto.getStatus());
-            // Do not update username, email, roles, or password for admin accounts
-            // Only status can be changed
         } else {
-            // For non-admin accounts, allow full update
             account.setUsername(dto.getUsername());
             account.setEmail(dto.getEmail());
             account.setStatus(dto.getStatus());
             
-            // Update password only if provided
             if (dto.getPassword() != null && !dto.getPassword().trim().isEmpty()) {
                 if (dto.getPassword().length() < 6) {
                     throw new IllegalArgumentException("Password must be at least 6 characters");
@@ -147,7 +130,6 @@ public class AccountServiceImpl implements AccountService {
                 account.setPassword(passwordEncoder.encode(dto.getPassword()));
             }
             
-            // Update roles
             Set<Role> roles = new HashSet<>();
             for (Integer roleId : dto.getRoleIds()) {
                 Role role = roleRepository.findById(roleId)
@@ -165,7 +147,6 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + id));
         
-        // Check if account has ADMIN role - admin cannot delete other admin accounts
         boolean isAdminAccount = account.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         if (isAdminAccount) {
@@ -177,49 +158,40 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void changePassword(Integer accountId, ChangePasswordDto dto) {
-        // Find account
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + accountId));
         
-        // Validate current password
         if (!passwordEncoder.matches(dto.getCurrentPassword(), account.getPassword())) {
             throw new IllegalArgumentException("Current password is incorrect");
         }
         
-        // Validate new password matches confirm password
         if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("New password and confirm password do not match");
         }
         
-        // Validate new password is different from current password
         if (passwordEncoder.matches(dto.getNewPassword(), account.getPassword())) {
             throw new IllegalArgumentException("New password must be different from current password");
         }
         
-        // Update password - IMPORTANT: Only hash once!
         account.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         accountRepository.save(account);
     }
 
     @Override
     public void adminChangePassword(Integer accountId, AdminChangePasswordDto dto) {
-        // Find account
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new IllegalArgumentException("Account not found with id: " + accountId));
         
-        // Check if account has ADMIN role - admin cannot change password of other admin accounts
         boolean isAdminAccount = account.getRoles().stream()
                 .anyMatch(role -> role.getName().equals("ADMIN"));
         if (isAdminAccount) {
             throw new IllegalStateException("Cannot change password for admin accounts. Admin accounts can only be viewed.");
         }
         
-        // Validate new password matches confirm password
         if (!dto.getNewPassword().equals(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("New password and confirm password do not match");
         }
         
-        // Update password - Admin can change password without knowing current password
         account.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         accountRepository.save(account);
     }

@@ -36,7 +36,6 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorCode", "500");
         model.addAttribute("errorMessage", "An internal server error occurred");
         model.addAttribute("requestedUrl", request.getRequestURL());
-        // Log the exception for debugging (in production, use proper logging)
         ex.printStackTrace();
         return "error/500";
     }

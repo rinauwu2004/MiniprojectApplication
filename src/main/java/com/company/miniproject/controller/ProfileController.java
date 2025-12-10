@@ -6,9 +6,11 @@ import com.company.miniproject.entity.Account;
 import com.company.miniproject.entity.Department;
 import com.company.miniproject.entity.Employee;
 import com.company.miniproject.entity.Gender;
+import com.company.miniproject.entity.ProjectAssignment;
 import com.company.miniproject.repository.AccountRepository;
 import com.company.miniproject.repository.DepartmentRepository;
 import com.company.miniproject.repository.EmployeeRepository;
+import com.company.miniproject.repository.ProjectAssignmentRepository;
 import com.company.miniproject.service.AccountService;
 import com.company.miniproject.service.EmployeeService;
 import jakarta.validation.Valid;
@@ -21,11 +23,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/profile")
 public class ProfileController {
 
     @Autowired
@@ -42,8 +44,11 @@ public class ProfileController {
     
     @Autowired
     private DepartmentRepository departmentRepository;
+    
+    @Autowired
+    private ProjectAssignmentRepository projectAssignmentRepository;
 
-    @GetMapping
+    @GetMapping("/profile")
     @Transactional(readOnly = true)
     public String showProfile(Authentication authentication, Model model) {
         if (authentication == null) {
@@ -52,7 +57,6 @@ public class ProfileController {
         
         String username = authentication.getName();
         
-        // Find account by username
         Optional<Account> accountOpt = accountRepository.findByUsername(username);
         if (accountOpt.isEmpty()) {
             model.addAttribute("errorMessage", "Account not found");
@@ -60,7 +64,6 @@ public class ProfileController {
         }
         
         Account account = accountOpt.get();
-        // Force load roles and employee
         if (account.getRoles() != null) {
             account.getRoles().size();
         }
@@ -69,7 +72,6 @@ public class ProfileController {
         }
         model.addAttribute("account", account);
         
-        // Try to find employee record
         Optional<Employee> employeeOpt = employeeRepository.findByAccountId(account.getId());
         if (employeeOpt.isPresent()) {
             model.addAttribute("employee", employeeOpt.get());
@@ -78,7 +80,7 @@ public class ProfileController {
         return "profile/view";
     }
 
-    @GetMapping("/change-password")
+    @GetMapping("/profile/change-password")
     public String showChangePasswordForm(Authentication authentication, Model model) {
         if (authentication == null) {
             return "redirect:/login";
@@ -96,7 +98,7 @@ public class ProfileController {
         return "profile/change-password";
     }
 
-    @PostMapping("/change-password")
+    @PostMapping("/profile/change-password")
     public String changePassword(Authentication authentication,
                                  @Valid @ModelAttribute("changePasswordDto") ChangePasswordDto dto,
                                  BindingResult result,
@@ -116,7 +118,6 @@ public class ProfileController {
         Account account = accountOpt.get();
         model.addAttribute("account", account);
         
-        // Validate confirm password matches
         if (!result.hasFieldErrors("newPassword") && !result.hasFieldErrors("confirmPassword")) {
             if (dto.getNewPassword() != null && dto.getConfirmPassword() != null 
                     && !dto.getNewPassword().equals(dto.getConfirmPassword())) {
@@ -138,7 +139,7 @@ public class ProfileController {
         }
     }
     
-    @GetMapping("/edit")
+    @GetMapping("/profile/edit")
     @Transactional(readOnly = true)
     public String showEditProfileForm(Authentication authentication, Model model) {
         if (authentication == null) {
@@ -180,7 +181,7 @@ public class ProfileController {
         return "profile/edit";
     }
     
-    @PostMapping("/update")
+    @PostMapping("/profile/update")
     public String updateProfile(Authentication authentication,
                                @Valid @ModelAttribute("employeeDto") EmployeeRegistrationDto dto,
                                BindingResult result,
@@ -206,11 +207,8 @@ public class ProfileController {
         
         Employee employee = employeeOpt.get();
         
-        // Employee can only edit personal info, not username, email, or department
-        // Keep original username and email
         dto.setUsername(account.getUsername());
         dto.setEmail(account.getEmail());
-        // Keep original department
         dto.setDepartmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null);
         
         if (result.hasErrors()) {
@@ -236,6 +234,72 @@ public class ProfileController {
         }
         
         return "redirect:/profile";
+    }
+    
+    @GetMapping("/employee/profile")
+    @Transactional(readOnly = true)
+    public String showEmployeeProfile(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        
+        String username = authentication.getName();
+        var account = accountRepository.findByUsername(username);
+        if (account.isEmpty()) {
+            model.addAttribute("errorMessage", "Account not found");
+            return "employee/profile";
+        }
+        
+        var employee = employeeRepository.findByAccountId(account.get().getId());
+        if (employee.isPresent()) {
+            Employee emp = employee.get();
+            model.addAttribute("employee", emp);
+            
+            try {
+                List<ProjectAssignment> assignments = 
+                    projectAssignmentRepository.findByEmployeeId(emp.getId());
+                model.addAttribute("assignments", assignments);
+            } catch (Exception e) {
+                model.addAttribute("assignments", Collections.emptyList());
+            }
+        } else {
+            model.addAttribute("errorMessage", "Employee profile not found. This account may not have an employee record.");
+            model.addAttribute("assignments", Collections.emptyList());
+        }
+        
+        return "employee/profile";
+    }
+    
+    @GetMapping("/employee/projects")
+    @Transactional(readOnly = true)
+    public String showMyProjects(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return "redirect:/login";
+        }
+        
+        String username = authentication.getName();
+        var account = accountRepository.findByUsername(username);
+        if (account.isEmpty()) {
+            model.addAttribute("errorMessage", "Account not found");
+            return "employee/projects";
+        }
+        
+        var employee = employeeRepository.findByAccountId(account.get().getId());
+        if (employee.isPresent()) {
+            try {
+                List<ProjectAssignment> assignments = 
+                    projectAssignmentRepository.findByEmployeeId(employee.get().getId());
+                model.addAttribute("assignments", assignments);
+            } catch (Exception e) {
+                model.addAttribute("assignments", Collections.emptyList());
+                model.addAttribute("errorMessage", "Error loading project assignments");
+            }
+        } else {
+            model.addAttribute("errorMessage", "Employee profile not found. This account may not have an employee record.");
+            model.addAttribute("assignments", Collections.emptyList());
+        }
+        
+        return "employee/projects";
     }
 }
 

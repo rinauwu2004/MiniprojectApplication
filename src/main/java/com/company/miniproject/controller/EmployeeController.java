@@ -80,7 +80,6 @@ public class EmployeeController {
                                 BindingResult result,
                                 Model model,
                                 RedirectAttributes redirectAttributes) {
-        // Validate password for create
         if (dto.getPassword() == null || dto.getPassword().trim().isEmpty()) {
             result.rejectValue("password", "error.password", "Password is required");
         }
@@ -97,7 +96,6 @@ public class EmployeeController {
             employeeService.save(dto);
             redirectAttributes.addFlashAttribute("successMessage", "Employee created successfully");
         } catch (IllegalArgumentException e) {
-            // Parse error message and add to appropriate field
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.contains("Username already exists")) {
@@ -110,7 +108,6 @@ public class EmployeeController {
                     model.addAttribute("errorMessage", errorMsg);
                 }
             }
-            // Keep DTO to preserve form values
             model.addAttribute("employeeDto", dto);
             List<Department> departments = departmentService.findAll();
             model.addAttribute("departments", departments);
@@ -137,7 +134,6 @@ public class EmployeeController {
         dto.setDepartmentId(employee.getDepartment() != null ? employee.getDepartment().getId() : null);
         dto.setUsername(employee.getAccount().getUsername());
         dto.setEmail(employee.getAccount().getEmail());
-        // Password is not set for edit
         
         List<Department> departments = departmentService.findAll();
         model.addAttribute("employeeDto", dto);
@@ -155,12 +151,10 @@ public class EmployeeController {
                                 Model model,
                                 Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
-        // If MANAGER (not ADMIN), preserve original username and email
         if (authentication != null && authentication.getAuthorities().stream()
                 .noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
             Employee employee = employeeService.findById(id)
                     .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + id));
-            // Keep original username and email - MANAGER cannot change account info
             dto.setUsername(employee.getAccount().getUsername());
             dto.setEmail(employee.getAccount().getEmail());
         }
@@ -178,7 +172,6 @@ public class EmployeeController {
             employeeService.update(id, dto);
             redirectAttributes.addFlashAttribute("successMessage", "Employee updated successfully");
         } catch (IllegalArgumentException e) {
-            // Parse error message and add to appropriate field
             String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.contains("Username already exists")) {
@@ -191,7 +184,6 @@ public class EmployeeController {
                     model.addAttribute("errorMessage", errorMsg);
                 }
             }
-            // Keep DTO to preserve form values
             model.addAttribute("employeeDto", dto);
             List<Department> departments = departmentService.findAll();
             model.addAttribute("departments", departments);
@@ -236,7 +228,6 @@ public class EmployeeController {
         Employee employee = employeeService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Employee not found with id: " + id));
         
-        // Validate confirm password matches
         if (!result.hasFieldErrors("newPassword") && !result.hasFieldErrors("confirmPassword")) {
             if (dto.getNewPassword() != null && dto.getConfirmPassword() != null 
                     && !dto.getNewPassword().equals(dto.getConfirmPassword())) {

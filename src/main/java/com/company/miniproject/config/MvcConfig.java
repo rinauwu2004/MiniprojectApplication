@@ -42,15 +42,10 @@ public class MvcConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/js/");
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
-        // Handle favicon.ico to prevent 404 errors
-        registry.addResourceHandler("/favicon.ico")
-                .addResourceLocations("classpath:/static/")
-                .resourceChain(false);
     }
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // Map root URL to index page
         registry.addViewController("/").setViewName("index");
     }
 }

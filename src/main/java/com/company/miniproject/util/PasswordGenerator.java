@@ -11,14 +11,10 @@ public class PasswordGenerator {
         
         System.out.println("Password: " + password);
         System.out.println("BCrypt Hash: " + hash);
-        System.out.println("\nUse this hash in your data.sql file:");
         System.out.println("'" + hash + "'");
 
         boolean matches = encoder.matches(password, hash);
-        System.out.println("\nVerification: " + (matches ? "SUCCESS" : "FAILED"));
+        System.out.println("Verification: " + (matches ? "SUCCESS" : "FAILED"));
     }
 }
-
-
-
 

@@ -52,7 +52,6 @@ public class DepartmentController {
                 .orElseThrow(() -> new IllegalArgumentException("Department not found with id: " + id));
         model.addAttribute("department", department);
         
-        // Get employees not in this department for the add employee form
         List<com.company.miniproject.entity.Employee> availableEmployees = 
             employeeRepository.findEmployeesNotInDepartment(id);
         model.addAttribute("availableEmployees", availableEmployees);
@@ -63,17 +62,17 @@ public class DepartmentController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("department", new Department());
-        model.addAttribute("formAction", "/departments"); // Set form action for new department
+        model.addAttribute("formAction", "/departments");
         return "department/form";
     }
 
     @PostMapping
     public String createDepartment(@Valid @ModelAttribute("department") Department department,
                                   BindingResult result,
-                                  Model model, // Added Model for error re-rendering
+                                  Model model,
                                   RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            model.addAttribute("formAction", "/departments"); // Keep form action on error
+            model.addAttribute("formAction", "/departments");
             return "department/form";
         }
         
@@ -82,7 +81,7 @@ public class DepartmentController {
             redirectAttributes.addFlashAttribute("successMessage", "Department created successfully");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            model.addAttribute("formAction", "/departments"); // Keep form action on error
+            model.addAttribute("formAction", "/departments");
             return "department/form";
         }
         
@@ -94,7 +93,7 @@ public class DepartmentController {
         Department department = departmentService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Department not found with id: " + id));
         model.addAttribute("department", department);
-        model.addAttribute("formAction", "/departments/" + id); // Set form action for edit department
+        model.addAttribute("formAction", "/departments/" + id);
         return "department/form";
     }
 
@@ -102,10 +101,10 @@ public class DepartmentController {
     public String updateDepartment(@PathVariable Integer id,
                                    @Valid @ModelAttribute("department") Department department,
                                    BindingResult result,
-                                   Model model, // Added Model for error re-rendering
+                                   Model model,
                                    RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            model.addAttribute("formAction", "/departments/" + id); // Keep form action on error
+            model.addAttribute("formAction", "/departments/" + id);
             return "department/form";
         }
         
@@ -114,7 +113,7 @@ public class DepartmentController {
             redirectAttributes.addFlashAttribute("successMessage", "Department updated successfully");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            model.addAttribute("formAction", "/departments/" + id); // Keep form action on error
+            model.addAttribute("formAction", "/departments/" + id);
             return "department/form";
         }
         

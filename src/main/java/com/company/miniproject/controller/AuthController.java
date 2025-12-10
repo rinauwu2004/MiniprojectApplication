@@ -17,18 +17,16 @@ public class AuthController {
             Model model) {
 
         if (error != null) {
-            // Get error key from session (set by CustomAuthenticationFailureHandler)
             HttpSession session = request.getSession(false);
             if (session != null) {
                 String loginErrorKey = (String) session.getAttribute("loginErrorKey");
                 if (loginErrorKey != null) {
                     model.addAttribute("loginErrorKey", loginErrorKey);
-                    session.removeAttribute("loginErrorKey"); // Remove after use
+                    session.removeAttribute("loginErrorKey");
                 } else {
                     model.addAttribute("loginErrorKey", "error.auth.invalid_credentials");
                 }
                 
-                // Get username from session
                 String lastUsername = (String) session.getAttribute("SPRING_SECURITY_LAST_USERNAME");
                 if (lastUsername != null) {
                     model.addAttribute("lastUsername", lastUsername);

@@ -25,19 +25,14 @@ public class IndexController {
         
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         
-        // Check for ADMIN role
         boolean isAdmin = authorities.stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
         
-        // Check for MANAGER role
         boolean isManager = authorities.stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_MANAGER"));
         
-        // Check for EMPLOYEE role
         boolean isEmployee = authorities.stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYEE"));
-        
-        // All roles go to dashboard, but with different statistics
         Map<String, Long> stats = dashboardService.getStatistics(authentication);
         model.addAttribute("stats", stats);
         model.addAttribute("isAdmin", isAdmin);
@@ -52,4 +47,3 @@ public class IndexController {
         return index(authentication, model);
     }
 }
-
