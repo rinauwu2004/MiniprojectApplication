@@ -125,7 +125,7 @@
                                               class="badge bg-danger" 
                                               th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Female</span>
                                         <span th:if="${emp.gender?.name() == 'Other'}" 
-                                              class="badge bg-warning text-dark" 
+                                              class="badge bg-warning" 
                                               th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Other</span>
                                     </td>
                                     <td th:text="${#temporals.format(emp.birthDate, 'yyyy-MM-dd')}">1990-01-01</td>

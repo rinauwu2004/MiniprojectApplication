@@ -58,9 +58,9 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <span class="dropdown-item-text">
-                                <small sec:authorize="hasRole('ADMIN')" class="badge bg-danger">ADMIN</small>
-                                <small sec:authorize="hasRole('MANAGER')" class="badge bg-warning text-dark">MANAGER</small>
-                                <small sec:authorize="hasRole('EMPLOYEE')" class="badge bg-info">EMPLOYEE</small>
+                                <small sec:authorize="hasRole('ADMIN')" class="badge role-admin">ADMIN</small>
+                                <small sec:authorize="hasRole('MANAGER')" class="badge role-manager">MANAGER</small>
+                                <small sec:authorize="hasRole('EMPLOYEE')" class="badge role-employee">EMPLOYEE</small>
                             </span>
                         </li>
                         <li><hr class="dropdown-divider"></li>
@@ -83,6 +83,9 @@
         </div>
     </div>
 </nav>
+
+
+
 
 
 

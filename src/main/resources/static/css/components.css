@@ -28,15 +28,16 @@
 }
 
 .btn-primary {
-    background: var(--gradient-primary);
+    background-color: var(--primary-color);
     color: var(--white);
-    border-color: transparent;
+    border-color: var(--primary-color);
 }
 
 .btn-primary:hover {
-    background: var(--gradient-primary-hover);
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
     color: var(--white);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .btn-secondary {
@@ -51,24 +52,26 @@
 }
 
 .btn-success {
-    background: var(--gradient-success);
+    background-color: var(--success-color);
     color: var(--white);
-    border-color: transparent;
+    border-color: var(--success-color);
 }
 
 .btn-success:hover {
-    background: linear-gradient(135deg, var(--success-dark) 0%, var(--success-color) 100%);
+    background-color: var(--success-dark);
+    border-color: var(--success-dark);
     color: var(--white);
 }
 
 .btn-danger {
-    background: var(--gradient-danger);
+    background-color: var(--danger-color);
     color: var(--white);
-    border-color: transparent;
+    border-color: var(--danger-color);
 }
 
 .btn-danger:hover {
-    background: linear-gradient(135deg, var(--danger-dark) 0%, var(--danger-color) 100%);
+    background-color: var(--danger-dark);
+    border-color: var(--danger-dark);
     color: var(--white);
 }
 
@@ -130,7 +133,7 @@
 }
 
 .card-header {
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
     color: var(--white);
     padding: 1.25rem 1.5rem;
     border-bottom: none;
@@ -183,7 +186,7 @@
 .form-select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .form-control::placeholder {
@@ -255,37 +258,89 @@
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
-    border-radius: var(--border-radius);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-color: transparent;
 }
 
 .badge.bg-primary {
-    background: var(--gradient-primary) !important;
-    color: var(--white);
+    background-color: rgba(37, 99, 235, 0.1) !important;
+    color: #2563eb !important;
+    border-color: #2563eb !important;
 }
 
 .badge.bg-success {
-    background-color: var(--success-color);
-    color: var(--white);
+    background-color: rgba(16, 185, 129, 0.1) !important;
+    color: #10b981 !important;
+    border-color: #10b981 !important;
 }
 
 .badge.bg-danger {
-    background-color: var(--danger-color);
-    color: var(--white);
+    background-color: rgba(239, 68, 68, 0.1) !important;
+    color: #ef4444 !important;
+    border-color: #ef4444 !important;
 }
 
 .badge.bg-warning {
-    background-color: var(--warning-color);
-    color: var(--white);
+    background-color: rgba(168, 85, 247, 0.1) !important;
+    color: #a855f7 !important;
+    border-color: #a855f7 !important;
 }
 
 .badge.bg-info {
-    background-color: var(--info-color);
-    color: var(--white);
+    background-color: rgba(6, 182, 212, 0.1) !important;
+    color: #06b6d4 !important;
+    border-color: #06b6d4 !important;
 }
 
 .badge.bg-secondary {
-    background-color: var(--gray-500);
-    color: var(--white);
+    background-color: var(--gray-100);
+    color: var(--gray-700);
+    border-color: var(--gray-400);
+}
+
+/* Status-specific badges */
+.badge.status-active {
+    background-color: var(--status-active-bg);
+    color: var(--status-active-color);
+    border-color: var(--status-active-color);
+}
+
+.badge.status-blocked {
+    background-color: var(--status-blocked-bg);
+    color: var(--status-blocked-color);
+    border-color: var(--status-blocked-color);
+}
+
+.badge.status-pending {
+    background-color: var(--status-pending-bg);
+    color: var(--status-pending-color);
+    border-color: var(--status-pending-color);
+}
+
+.badge.status-completed {
+    background-color: var(--status-completed-bg);
+    color: var(--status-completed-color);
+    border-color: var(--status-completed-color);
+}
+
+/* Role badges */
+.badge.role-admin {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+.badge.role-manager {
+    background-color: #fef3c7;
+    color: #d97706;
+    border-color: #d97706;
+}
+
+.badge.role-employee {
+    background-color: #dbeafe;
+    color: #2563eb;
+    border-color: #2563eb;
 }
 
 .alert {
@@ -363,12 +418,12 @@
     z-index: 2;
     color: var(--primary-dark);
     background-color: var(--gray-50);
-    border-color: var(--gray-400);
+    border-color: var(--primary-color);
 }
 
 .page-item.active .page-link {
     z-index: 3;
-    background: var(--gradient-primary);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
     color: var(--white);
     border-color: var(--primary-color);
 }
@@ -379,6 +434,8 @@
     background-color: var(--white);
     border-color: var(--gray-300);
 }
+
+
 
 
 

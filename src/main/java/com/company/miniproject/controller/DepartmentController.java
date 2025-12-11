@@ -26,23 +26,27 @@ public class DepartmentController {
 
     @GetMapping
     @Transactional(readOnly = true)
-    public String listDepartments(Model model) {
+    public String listDepartments(@RequestParam(required = false) String sortBy,
+                                 @RequestParam(required = false) String sortDir,
+                                 Model model) {
         try {
-            List<Department> departments = departmentService.findAll();
+            String sortField = (sortBy != null && !sortBy.trim().isEmpty()) ? sortBy : "name";
+            boolean ascending = (sortDir == null || !sortDir.equalsIgnoreCase("desc"));
+            
+            if (!isValidSortField(sortField)) {
+                sortField = "name";
+                ascending = true;
+            }
+            
+            List<Department> departments = departmentService.findAll(sortField, ascending);
             model.addAttribute("departments", departments);
+            model.addAttribute("sortBy", sortField);
+            model.addAttribute("sortDir", ascending ? "asc" : "desc");
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("errorMessage", "Error loading departments: " + e.getMessage());
         }
         return "department/list";
-    }
-    
-    @GetMapping("/test")
-    @Transactional(readOnly = true)
-    public String testDepartments(Model model) {
-        List<Department> departments = departmentService.findAll();
-        model.addAttribute("departments", departments);
-        return "department/test";
     }
     
     @GetMapping("/{id}")
@@ -159,5 +163,9 @@ public class DepartmentController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/departments/" + id;
+    }
+    
+    private boolean isValidSortField(String field) {
+        return field != null && (field.equals("name") || field.equals("description"));
     }
 }

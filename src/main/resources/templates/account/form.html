@@ -121,7 +121,7 @@
                     
                     <div class="mb-3">
                         <label class="form-label">
-                            <span th:text="#{form.label.roles}">Roles</span> <span class="text-danger">*</span>
+                            <span th:text="#{form.label.role}">Role</span> <span class="text-danger">*</span>
                         </label>
                         <div th:classappend="${#fields.hasErrors('roleIds')} ? 'is-invalid' : ''">
                             <div th:each="role : ${roles}" class="form-check">
@@ -132,9 +132,9 @@
                                        th:field="*{roleIds}"
                                        th:disabled="${isAdminAccount != null and isAdminAccount}">
                                 <label class="form-check-label" th:for="'role_' + ${role.id}">
-                                    <span th:if="${role.name == 'ADMIN'}" class="badge bg-danger" th:text="#{role.admin}">ADMIN</span>
-                                    <span th:if="${role.name == 'MANAGER'}" class="badge bg-warning text-dark" th:text="#{role.manager}">MANAGER</span>
-                                    <span th:if="${role.name == 'EMPLOYEE'}" class="badge bg-info" th:text="#{role.employee}">EMPLOYEE</span>
+                                    <span th:if="${role.name == 'ADMIN'}" class="badge role-admin" th:text="#{role.admin}">ADMIN</span>
+                                    <span th:if="${role.name == 'MANAGER'}" class="badge role-manager" th:text="#{role.manager}">MANAGER</span>
+                                    <span th:if="${role.name == 'EMPLOYEE'}" class="badge role-employee" th:text="#{role.employee}">EMPLOYEE</span>
                                 </label>
                             </div>
                             <!-- Hidden fields to preserve roleIds values when disabled -->

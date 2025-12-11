@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,10 +40,21 @@ public class ProjectController {
     @Transactional(readOnly = true)
     public String listProjects(@RequestParam(defaultValue = "0") int page,
                               @RequestParam(defaultValue = "10") int size,
+                              @RequestParam(required = false) String sortBy,
+                              @RequestParam(required = false) String sortDir,
                               Model model,
                               Authentication authentication) {
         try {
-            Pageable pageable = PageRequest.of(page, size);
+            String sortField = (sortBy != null && !sortBy.trim().isEmpty()) ? sortBy : "name";
+            Sort.Direction direction = (sortDir != null && sortDir.equalsIgnoreCase("desc")) 
+                    ? Sort.Direction.DESC : Sort.Direction.ASC;
+            
+            if (!isValidSortField(sortField)) {
+                sortField = "name";
+                direction = Sort.Direction.ASC;
+            }
+            
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
             Page<Project> projectPage;
             
             boolean isEmployeeOnly = authentication != null && 
@@ -73,6 +85,9 @@ public class ProjectController {
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", projectPage.getTotalPages());
             model.addAttribute("totalItems", projectPage.getTotalElements());
+            model.addAttribute("size", size);
+            model.addAttribute("sortBy", sortField);
+            model.addAttribute("sortDir", direction.toString().toLowerCase());
             model.addAttribute("statuses", ProjectStatus.values());
         } catch (Exception e) {
             e.printStackTrace();
@@ -206,8 +221,6 @@ public class ProjectController {
                                      Model model,
                                      Authentication authentication,
                                      RedirectAttributes redirectAttributes) {
-        dto.setProjectId(id);
-        
         Project project = projectService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + id));
         List<ProjectAssignment> assignments = projectService.getProjectAssignments(id);
@@ -259,5 +272,10 @@ public class ProjectController {
         }
         
         return "redirect:/projects/" + projectId;
+    }
+    
+    private boolean isValidSortField(String field) {
+        return field != null && (field.equals("name") || field.equals("startDate") 
+                || field.equals("endDate") || field.equals("status"));
     }
 }

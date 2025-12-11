@@ -1,19 +1,33 @@
 :root {
-    --primary-color: #667eea;
-    --primary-dark: #5568d3;
-    --primary-light: #8b9eff;
-    --secondary-color: #764ba2;
-    --secondary-dark: #5d3a7f;
-    --secondary-light: #9a6fc5;
+    /* Primary colors: Green (xanh lá) */
+    --primary-color: #10b981;
+    --primary-dark: #059669;
+    --primary-light: #34d399;
     
+    /* Secondary colors: Yellow light (vàng light) */
+    --secondary-color: #fbbf24;
+    --secondary-dark: #f59e0b;
+    --secondary-light: #fcd34d;
+    
+    /* Accent colors */
     --success-color: #10b981;
     --success-dark: #059669;
     --danger-color: #ef4444;
     --danger-dark: #dc2626;
-    --warning-color: #f59e0b;
-    --warning-dark: #d97706;
-    --info-color: #3b82f6;
-    --info-dark: #2563eb;
+    --warning-color: #fbbf24;
+    --warning-dark: #f59e0b;
+    --info-color: #06b6d4;
+    --info-dark: #0891b2;
+    
+    /* Status colors for badges */
+    --status-active-color: #10b981;
+    --status-active-bg: #d1fae5;
+    --status-blocked-color: #ef4444;
+    --status-blocked-bg: #fee2e2;
+    --status-pending-color: #f59e0b;
+    --status-pending-bg: #fef3c7;
+    --status-completed-color: #06b6d4;
+    --status-completed-bg: #cffafe;
     
     --gray-50: #f9fafb;
     --gray-100: #f3f4f6;
@@ -29,10 +43,9 @@
     --white: #ffffff;
     --black: #000000;
     
-    --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    --gradient-primary-hover: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
-    --gradient-success: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
-    --gradient-danger: linear-gradient(135deg, var(--danger-color) 0%, var(--danger-dark) 100%);
+    /* Light solid colors instead of gradients */
+    --primary-bg: #eff6ff;
+    --primary-border: #bfdbfe;
     
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
@@ -139,6 +152,8 @@ img {
         transform: translateY(0);
     }
 }
+
+
 
 
 

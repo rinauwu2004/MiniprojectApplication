@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,9 +37,20 @@ public class EmployeeController {
                                @RequestParam(required = false) Integer departmentId,
                                @RequestParam(defaultValue = "0") int page,
                                @RequestParam(defaultValue = "10") int size,
+                               @RequestParam(required = false) String sortBy,
+                               @RequestParam(required = false) String sortDir,
                                Model model) {
         try {
-            Pageable pageable = PageRequest.of(page, size);
+            String sortField = (sortBy != null && !sortBy.trim().isEmpty()) ? sortBy : "fullName";
+            Sort.Direction direction = (sortDir != null && sortDir.equalsIgnoreCase("desc")) 
+                    ? Sort.Direction.DESC : Sort.Direction.ASC;
+            
+            if (!isValidSortField(sortField)) {
+                sortField = "fullName";
+                direction = Sort.Direction.ASC;
+            }
+            
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
             Page<Employee> employeePage;
             
             if (keyword != null && !keyword.trim().isEmpty() || departmentId != null) {
@@ -53,6 +65,9 @@ public class EmployeeController {
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", employeePage.getTotalPages());
             model.addAttribute("totalItems", employeePage.getTotalElements());
+            model.addAttribute("size", size);
+            model.addAttribute("sortBy", sortField);
+            model.addAttribute("sortDir", direction.toString().toLowerCase());
             model.addAttribute("keyword", keyword);
             model.addAttribute("departmentId", departmentId);
             model.addAttribute("departments", departments);
@@ -249,5 +264,10 @@ public class EmployeeController {
             model.addAttribute("employee", employee);
             return "employee/change-password";
         }
+    }
+    
+    private boolean isValidSortField(String field) {
+        return field != null && (field.equals("fullName") || field.equals("phone") 
+                || field.equals("gender") || field.equals("account.email") || field.equals("department.name"));
     }
 }

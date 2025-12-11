@@ -2,6 +2,7 @@ package com.company.miniproject.controller;
 
 import com.company.miniproject.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
@@ -18,11 +19,8 @@ public class IndexController {
     private DashboardService dashboardService;
 
     @GetMapping("/")
+    @PreAuthorize("isAuthenticated()")
     public String index(Authentication authentication, Model model) {
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return "redirect:/login";
-        }
-        
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         
         boolean isAdmin = authorities.stream()
@@ -39,10 +37,22 @@ public class IndexController {
         model.addAttribute("isManager", isManager);
         model.addAttribute("isEmployee", isEmployee);
         
+        if (isAdmin) {
+            Map<String, Object> adminData = dashboardService.getAdminDashboardData();
+            model.addAttribute("dashboardData", adminData);
+        } else if (isManager && !isAdmin) {
+            Map<String, Object> managerData = dashboardService.getManagerDashboardData(authentication);
+            model.addAttribute("dashboardData", managerData);
+        } else if (isEmployee) {
+            Map<String, Object> employeeData = dashboardService.getEmployeeDashboardData(authentication);
+            model.addAttribute("dashboardData", employeeData);
+        }
+        
         return "index";
     }
     
     @GetMapping("/index")
+    @PreAuthorize("isAuthenticated()")
     public String indexPage(Authentication authentication, Model model) {
         return index(authentication, model);
     }

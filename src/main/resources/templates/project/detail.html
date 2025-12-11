@@ -153,7 +153,7 @@
                                     <th th:text="#{employee.department}">Department</th>
                                     <th th:text="#{project.role.in.project}">Role in Project</th>
                                     <th th:text="#{project.join.date}">Join Date</th>
-                                    <th th:text="#{common.actions}">Actions</th>
+                                    <th th:text="#{common.actions}" sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,7 +171,7 @@
                                         <span class="badge bg-primary" th:text="${assignment.roleInProject}">Developer</span>
                                     </td>
                                     <td th:text="${#temporals.format(assignment.joinDate, 'yyyy-MM-dd')}">2024-01-01</td>
-                                    <td>
+                                    <td sec:authorize="hasAnyRole('ADMIN', 'MANAGER')">
                                         <form th:action="@{/projects/assignments/{assignmentId}/delete(assignmentId=${assignment.id}, projectId=${project.id})}" 
                                               sec:authorize="hasRole('ADMIN')"
                                               method="post" 
@@ -181,7 +181,6 @@
                                                 <i class="fas fa-trash"></i> <span th:text="#{project.remove.member}">Remove</span>
                                             </button>
                                         </form>
-                                        <span sec:authorize="hasRole('EMPLOYEE') and !hasAnyRole('ADMIN', 'MANAGER')" class="text-muted">-</span>
                                     </td>
                                 </tr>
                             </tbody>

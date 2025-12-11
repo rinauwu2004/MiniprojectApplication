@@ -35,4 +35,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
                                 @Param("roleId") Integer roleId,
                                 @Param("status") AccountStatus status,
                                 Pageable pageable);
+    
+    @Query("SELECT COUNT(a) FROM Account a JOIN a.roles r WHERE r.name IN ('EMPLOYEE', 'MANAGER') AND a.status = :status")
+    long countEmployeesAndManagersByStatus(@Param("status") AccountStatus status);
 }

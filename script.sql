@@ -94,3 +94,25 @@ create table `project_assignment` (
         ON DELETE CASCADE ON UPDATE CASCADE,
 	UNIQUE KEY `uk_project_employee` (`project_id`, `employee_id`)
 );
+
+
+-- Indexing
+CREATE INDEX `idx_account_username` ON `account` (`username`);
+CREATE INDEX `idx_account_email` ON `account` (`email`);
+CREATE INDEX `idx_account_status` ON `account` (`status`);
+
+CREATE INDEX `idx_employee_full_name` ON `employee` (`full_name`);
+CREATE INDEX `idx_employee_department_id` ON `employee` (`department_id`);
+CREATE INDEX `idx_employee_account_id` ON `employee` (`account_id`);
+CREATE INDEX `idx_employee_phone` ON `employee` (`phone`);
+
+CREATE INDEX `idx_department_name` ON `department` (`name`);
+
+CREATE INDEX `idx_project_name` ON `project` (`name`);
+CREATE INDEX `idx_project_status` ON `project` (`status`);
+
+CREATE INDEX `idx_project_assignment_project_id` ON `project_assignment` (`project_id`);
+CREATE INDEX `idx_project_assignment_employee_id` ON `project_assignment` (`employee_id`);
+
+CREATE INDEX `idx_account_role_account_id` ON `account_role` (`account_id`);
+CREATE INDEX `idx_account_role_role_id` ON `account_role` (`role_id`);

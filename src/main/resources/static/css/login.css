@@ -68,11 +68,11 @@ body {
 }
 
 .container button {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     color: #fff;
     font-size: 14px;
     padding: 14px 45px;
-    border: 1px solid transparent;
+    border: 1px solid #10b981;
     border-radius: 8px;
     font-weight: 600;
     text-transform: uppercase;
@@ -151,7 +151,7 @@ body {
 }
 
 .toggle {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     color: #fff;
     position: relative;
     left: 0;
@@ -209,10 +209,10 @@ body {
 }
 
 .lang-switch .btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
     color: #fff;
-    border-color: #667eea;
-    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+    border-color: #10b981;
+    box-shadow: 0 6px 12px rgba(16, 185, 129, 0.3);
 }
 
 .lang-switch .btn:hover:not(.active) {
@@ -235,8 +235,8 @@ a,
 
 .container button:hover {
     transform: translateY(-3px);
-    box-shadow: 0 10px 22px rgba(102, 126, 234, .35);
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    box-shadow: 0 10px 22px rgba(16, 185, 129, .35);
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
 }
 
 .container button:active {
@@ -255,7 +255,7 @@ a,
     height: 2px;
     left: 0;
     bottom: -2px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #10b981;
     transition: width .28s ease;
 }
 
@@ -272,15 +272,15 @@ a,
 }
 
 .container input:focus {
-    background: #f4f0ff;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, .25);
-    border-color: #667eea;
+    background: #d1fae5;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, .25);
+    border-color: #10b981;
 }
 
 button:focus-visible,
 .lang-switch .btn:focus-visible,
 input:focus-visible {
-    outline: 3px solid rgba(102, 126, 234, .35);
+    outline: 3px solid rgba(16, 185, 129, .35);
     outline-offset: 3px;
 }
 
@@ -337,8 +337,8 @@ input:focus-visible {
 }
 
 .remember-me-container input[type="checkbox"]:checked + label::before {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background-color: #10b981;
+    border-color: #10b981;
 }
 
 .remember-me-container input[type="checkbox"]:checked + label::after {
@@ -346,7 +346,7 @@ input:focus-visible {
 }
 
 .remember-me-container input[type="checkbox"]:focus + label::before {
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, .25);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, .25);
 }
 
 .alert-message {

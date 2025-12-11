@@ -68,7 +68,7 @@ public class ProfileController {
             account.getRoles().size();
         }
         if (account.getEmployee() != null) {
-            account.getEmployee().getId(); // Force load employee
+            account.getEmployee().getId();
         }
         model.addAttribute("account", account);
         

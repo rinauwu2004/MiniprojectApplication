@@ -67,18 +67,78 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th th:text="#{common.id}">ID</th>
-                                    <th th:text="#{employee.full.name}">Full Name</th>
-                                    <th th:text="#{user.email}">Email</th>
-                                    <th th:text="#{employee.phone}">Phone</th>
-                                    <th th:text="#{employee.department}">Department</th>
-                                    <th th:text="#{employee.gender}">Gender</th>
+                                    <th>#</th>
+                                    <th>
+                                        <a th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage}, size=${size}, sortBy='fullName', sortDir=${sortBy == 'fullName' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{employee.full.name}">Full Name</span>
+                                            <span th:if="${sortBy == 'fullName'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'fullName'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage}, size=${size}, sortBy='account.email', sortDir=${sortBy == 'account.email' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{user.email}">Email</span>
+                                            <span th:if="${sortBy == 'account.email'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'account.email'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage}, size=${size}, sortBy='phone', sortDir=${sortBy == 'phone' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{employee.phone}">Phone</span>
+                                            <span th:if="${sortBy == 'phone'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'phone'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage}, size=${size}, sortBy='department.name', sortDir=${sortBy == 'department.name' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{employee.department}">Department</span>
+                                            <span th:if="${sortBy == 'department.name'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'department.name'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage}, size=${size}, sortBy='gender', sortDir=${sortBy == 'gender' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{employee.gender}">Gender</span>
+                                            <span th:if="${sortBy == 'gender'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'gender'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
                                     <th th:text="#{common.actions}">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="emp : ${employees}">
-                                    <td th:text="${emp.id}">1</td>
+                                <tr th:each="emp, iterStat : ${employees}">
+                                    <td th:text="${currentPage * size + iterStat.count}">1</td>
                                     <td>
                                         <strong th:text="${emp.fullName}">John Doe</strong>
                                     </td>
@@ -98,27 +158,24 @@
                                               class="badge bg-danger" 
                                               th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Female</span>
                                         <span th:if="${emp.gender?.name() == 'Other'}" 
-                                              class="badge bg-warning text-dark" 
+                                              class="badge bg-warning" 
                                               th:text="#{'gender.' + __${#strings.toLowerCase(emp.gender?.name())}__}">Other</span>
                                     </td>
                                     <td>
-                                        <a th:href="@{/employees/{id}/edit(id=${emp.id})}" 
-                                           class="btn btn-sm btn-primary me-1">
-                                            <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
-                                        </a>
-                                        <a th:href="@{/employees/{id}/change-password(id=${emp.id})}" 
-                                           sec:authorize="hasRole('ADMIN')"
-                                           class="btn btn-sm btn-warning me-1">
-                                            <i class="fas fa-key"></i> <span th:text="#{employee.change.password}">Change Password</span>
-                                        </a>
-                                        <form th:action="@{/employees/{id}/delete(id=${emp.id})}" 
-                                              method="post" 
-                                              style="display: inline;"
-                                              th:onsubmit="'return confirm(\'' + #{common.confirm.delete.employee} + '\');'">
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
-                                            </button>
-                                        </form>
+                                        <div class="d-flex gap-1 flex-nowrap" style="white-space: nowrap;">
+                                            <a th:href="@{/employees/{id}/edit(id=${emp.id})}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
+                                            </a>
+                                            <form th:action="@{/employees/{id}/delete(id=${emp.id})}" 
+                                                  method="post" 
+                                                  style="display: inline;"
+                                                  th:onsubmit="'return confirm(\'' + #{common.confirm.delete.employee} + '\');'">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -130,7 +187,7 @@
                         <ul class="pagination justify-content-center">
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                     <a class="page-link" 
-                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage - 1})}">
+                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage - 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}">
                                     <span th:text="#{common.previous}">Previous</span>
                                 </a>
                             </li>
@@ -138,12 +195,12 @@
                                 class="page-item" 
                                 th:classappend="${i == currentPage} ? 'active'">
                                 <a class="page-link" 
-                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${i})}"
+                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${i}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
                                    th:text="${i + 1}">1</a>
                             </li>
                             <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                     <a class="page-link" 
-                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage + 1})}">
+                                   th:href="@{/employees(keyword=${keyword}, departmentId=${departmentId}, page=${currentPage + 1}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}">
                                     <span th:text="#{common.next}">Next</span>
                                 </a>
                             </li>

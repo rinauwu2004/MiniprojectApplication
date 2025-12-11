@@ -9,6 +9,8 @@ public interface DepartmentService {
     
     List<Department> findAll();
     
+    List<Department> findAll(String sortBy, boolean ascending);
+    
     Optional<Department> findById(Integer id);
     
     Department save(Department department);

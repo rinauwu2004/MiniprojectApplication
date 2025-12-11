@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -25,13 +27,37 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional(readOnly = true)
     public List<Department> findAll() {
+        return findAll("name", true);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public List<Department> findAll(String sortBy, boolean ascending) {
         List<Department> departments = departmentRepository.findAllWithEmployees();
         for (Department dept : departments) {
             if (dept.getEmployees() != null) {
-                dept.getEmployees().size(); // Force initialization
+                dept.getEmployees().size();
             }
         }
-        return departments;
+        Comparator<Department> comparator;
+        if ("name".equals(sortBy)) {
+            comparator = Comparator.comparing(Department::getName, String.CASE_INSENSITIVE_ORDER);
+        } else if ("description".equals(sortBy)) {
+            comparator = Comparator.comparing(
+                dept -> dept.getDescription() != null ? dept.getDescription() : "",
+                String.CASE_INSENSITIVE_ORDER
+            );
+        } else {
+            comparator = Comparator.comparing(Department::getName, String.CASE_INSENSITIVE_ORDER);
+        }
+        
+        if (!ascending) {
+            comparator = comparator.reversed();
+        }
+        
+        return departments.stream()
+                .sorted(comparator)
+                .collect(Collectors.toList());
     }
 
     @Override

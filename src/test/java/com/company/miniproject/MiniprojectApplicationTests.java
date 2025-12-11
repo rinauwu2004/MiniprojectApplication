@@ -4,10 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MiniprojectApplicationTests {
+public class MiniprojectApplicationTests {
 
 	@Test
 	void contextLoads() {
 	}
 
 }
+
+
+
+

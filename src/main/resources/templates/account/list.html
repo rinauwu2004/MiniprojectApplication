@@ -82,17 +82,53 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th th:text="#{common.id}">ID</th>
-                                    <th th:text="#{user.username}">Username</th>
-                                    <th th:text="#{user.email}">Email</th>
-                                    <th th:text="#{common.status}">Status</th>
-                                    <th th:text="#{user.roles}">Roles</th>
+                                    <th>#</th>
+                                    <th>
+                                        <a th:href="@{/accounts(keyword=${keyword}, roleId=${roleId}, status=${status}, page=${currentPage}, size=${size}, sortBy='username', sortDir=${sortBy == 'username' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{user.username}">Username</span>
+                                            <span th:if="${sortBy == 'username'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'username'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a th:href="@{/accounts(keyword=${keyword}, roleId=${roleId}, status=${status}, page=${currentPage}, size=${size}, sortBy='email', sortDir=${sortBy == 'email' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{user.email}">Email</span>
+                                            <span th:if="${sortBy == 'email'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'email'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
+                                    <th>
+                                        <a th:href="@{/accounts(keyword=${keyword}, roleId=${roleId}, status=${status}, page=${currentPage}, size=${size}, sortBy='status', sortDir=${sortBy == 'status' && sortDir == 'asc' ? 'desc' : 'asc'})}" 
+                                           class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                            <span th:text="#{common.status}">Status</span>
+                                            <span th:if="${sortBy == 'status'}" class="ms-2">
+                                                <i th:if="${sortDir == 'asc'}" class="fas fa-sort-up"></i>
+                                                <i th:if="${sortDir == 'desc'}" class="fas fa-sort-down"></i>
+                                            </span>
+                                            <span th:unless="${sortBy == 'status'}" class="ms-2 text-muted">
+                                                <i class="fas fa-sort"></i>
+                                            </span>
+                                        </a>
+                                    </th>
+                                    <th th:text="#{user.role}">Role</th>
                                     <th th:text="#{common.actions}">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="account : ${accounts}">
-                                    <td th:text="${account.id}">1</td>
+                                <tr th:each="account, iterStat : ${accounts}">
+                                    <td th:text="${currentPage * size + iterStat.count}">1</td>
                                     <td>
                                         <strong>
                                             <a th:href="@{/accounts/{id}(id=${account.id})}" 
@@ -114,34 +150,31 @@
                                     </td>
                                     <td>
                                         <span th:each="role : ${account.roles}" class="badge me-1">
-                                            <span th:if="${role.name == 'ADMIN'}" class="badge bg-danger" th:text="#{role.admin}">ADMIN</span>
-                                            <span th:if="${role.name == 'MANAGER'}" class="badge bg-warning text-dark" th:text="#{role.manager}">MANAGER</span>
-                                            <span th:if="${role.name == 'EMPLOYEE'}" class="badge bg-info" th:text="#{role.employee}">EMPLOYEE</span>
+                                            <span th:if="${role.name == 'ADMIN'}" class="badge role-admin" th:text="#{role.admin}">ADMIN</span>
+                                            <span th:if="${role.name == 'MANAGER'}" class="badge role-manager" th:text="#{role.manager}">MANAGER</span>
+                                            <span th:if="${role.name == 'EMPLOYEE'}" class="badge role-employee" th:text="#{role.employee}">EMPLOYEE</span>
                                         </span>
                                     </td>
                                     <td>
-                                        <a th:href="@{/accounts/{id}(id=${account.id})}" 
-                                           class="btn btn-sm btn-info me-1">
-                                            <i class="fas fa-eye"></i> <span th:text="#{common.view}">View</span>
-                                        </a>
-                                        <a th:href="@{/accounts/{id}/edit(id=${account.id})}" 
-                                           class="btn btn-sm btn-primary me-1">
-                                            <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
-                                        </a>
-                                        <a th:href="@{/accounts/{id}/change-password(id=${account.id})}" 
-                                           th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
-                                           class="btn btn-sm btn-warning me-1">
-                                            <i class="fas fa-key"></i> <span th:text="#{user.change.password}">Change Password</span>
-                                        </a>
-                                        <form th:action="@{/accounts/{id}/delete(id=${account.id})}" 
-                                              th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
-                                              method="post" 
-                                              style="display: inline;"
-                                              th:onsubmit="'return confirm(\'' + #{user.confirm.delete} + '\');'">
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
-                                            </button>
-                                        </form>
+                                        <div class="d-flex gap-1 flex-nowrap" style="white-space: nowrap;">
+                                            <a th:href="@{/accounts/{id}(id=${account.id})}" 
+                                               class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i> <span th:text="#{common.view}">View</span>
+                                            </a>
+                                            <a th:href="@{/accounts/{id}/edit(id=${account.id})}" 
+                                               class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i> <span th:text="#{common.edit}">Edit</span>
+                                            </a>
+                                            <form th:action="@{/accounts/{id}/delete(id=${account.id})}" 
+                                                  th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
+                                                  method="post" 
+                                                  style="display: inline;"
+                                                  th:onsubmit="'return confirm(\'' + #{user.confirm.delete} + '\');'">
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="fas fa-trash"></i> <span th:text="#{common.delete}">Delete</span>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -162,18 +195,18 @@
                             <ul class="pagination mb-0">
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                     <a class="page-link" 
-                                       th:href="@{/accounts(page=${currentPage - 1}, keyword=${keyword}, roleId=${roleId}, status=${status})}"
+                                       th:href="@{/accounts(page=${currentPage - 1}, keyword=${keyword}, roleId=${roleId}, status=${status}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
                                        th:text="#{common.previous}">Previous</a>
                                 </li>
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
                                     th:classappend="${i == currentPage} ? 'active'">
                                     <a class="page-link" 
-                                       th:href="@{/accounts(page=${i}, keyword=${keyword}, roleId=${roleId}, status=${status})}" 
+                                       th:href="@{/accounts(page=${i}, keyword=${keyword}, roleId=${roleId}, status=${status}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}" 
                                        th:text="${i + 1}">1</a>
                                 </li>
                                 <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                     <a class="page-link" 
-                                       th:href="@{/accounts(page=${currentPage + 1}, keyword=${keyword}, roleId=${roleId}, status=${status})}"
+                                       th:href="@{/accounts(page=${currentPage + 1}, keyword=${keyword}, roleId=${roleId}, status=${status}, size=${size}, sortBy=${sortBy}, sortDir=${sortDir})}"
                                        th:text="#{common.next}">Next</a>
                                 </li>
                             </ul>

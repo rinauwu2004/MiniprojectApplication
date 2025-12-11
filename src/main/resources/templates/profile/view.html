@@ -46,12 +46,12 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th><span th:text="#{user.roles}">Roles</span>:</th>
+                                    <th><span th:text="#{user.role}">Role</span>:</th>
                                     <td>
                                         <span th:each="role : ${account.roles}" class="badge me-1">
-                                            <span th:if="${role.name == 'ADMIN'}" class="badge bg-danger" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">ADMIN</span>
-                                            <span th:if="${role.name == 'MANAGER'}" class="badge bg-warning text-dark" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">MANAGER</span>
-                                            <span th:if="${role.name == 'EMPLOYEE'}" class="badge bg-info" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">EMPLOYEE</span>
+                                            <span th:if="${role.name == 'ADMIN'}" class="badge role-admin" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">ADMIN</span>
+                                            <span th:if="${role.name == 'MANAGER'}" class="badge role-manager" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">MANAGER</span>
+                                            <span th:if="${role.name == 'EMPLOYEE'}" class="badge role-employee" th:text="#{'role.' + __${#strings.toLowerCase(role.name)}__}">EMPLOYEE</span>
                                         </span>
                                     </td>
                                 </tr>
@@ -91,7 +91,15 @@
                                     <tr>
                                         <th><span th:text="#{employee.gender}">Gender</span>:</th>
                                         <td>
-                                            <span class="badge bg-secondary" th:text="#{'gender.' + __${#strings.toLowerCase(employee.gender)}__}">Male</span>
+                                            <span th:if="${employee.gender?.name() == 'Male'}" 
+                                                  class="badge bg-primary" 
+                                                  th:text="#{'gender.' + __${#strings.toLowerCase(employee.gender?.name())}__}">Male</span>
+                                            <span th:if="${employee.gender?.name() == 'Female'}" 
+                                                  class="badge bg-danger" 
+                                                  th:text="#{'gender.' + __${#strings.toLowerCase(employee.gender?.name())}__}">Female</span>
+                                            <span th:if="${employee.gender?.name() == 'Other'}" 
+                                                  class="badge bg-warning" 
+                                                  th:text="#{'gender.' + __${#strings.toLowerCase(employee.gender?.name())}__}">Other</span>
                                         </td>
                                     </tr>
                                     <tr>
