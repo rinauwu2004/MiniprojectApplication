@@ -48,3 +48,5 @@ INSERT IGNORE INTO `project_assignment` (`project_id`, `employee_id`, `role_in_p
 (2, 2, 'BUSINESS ANALYST', '2024-03-05'),
 (2, 4, 'DEVELOPER', '2024-03-10');
 
+
+
