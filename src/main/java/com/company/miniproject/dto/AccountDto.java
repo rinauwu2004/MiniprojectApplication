@@ -27,14 +27,16 @@ public class AccountDto {
     private String email;
     
     @Size(min = 6, message = "Password must be at least 6 characters")
-    private String password; // Optional for update
+    private String password;
     
     @NotNull(message = "Status is required")
     private AccountStatus status;
     
     @NotNull(message = "At least one role is required")
-    private Set<Integer> roleIds; // Role IDs selected by admin
+    private Set<Integer> roleIds;
 }
+
+
 
 
 

@@ -7,15 +7,22 @@
     <title th:text="#{project.title}">Projects</title>
 </head>
 <body>
-    <div layout:fragment="body">
+    <div layout:fragment="body" class="fade-in">
+        <div class="page-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-project-diagram"></i> <span th:text="#{project.title}">Project Management</span></h2>
+                <p class="text-muted mb-0">Manage and track all your projects</p>
+            </div>
+            <a th:href="@{/projects/new}" 
+               sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
+               class="btn btn-primary">
+                <i class="fas fa-plus"></i> <span th:text="#{project.new}">Add New Project</span>
+            </a>
+        </div>
+        
         <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-project-diagram"></i> <span th:text="#{project.title}">Project Management</span></h5>
-                <a th:href="@{/projects/new}" 
-                   sec:authorize="hasAnyRole('ADMIN', 'MANAGER')"
-                   class="btn btn-light btn-sm">
-                    <i class="fas fa-plus"></i> <span th:text="#{project.new}">Add New Project</span>
-                </a>
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-list"></i> <span th:text="#{project.list}">Project List</span></h5>
             </div>
             <div class="card-body">
                 <div th:if="${projects == null or projects.isEmpty()}" class="alert alert-info">
@@ -104,8 +111,8 @@
                         </ul>
                     </nav>
                     
-                    <div class="text-muted text-center mt-2">
-                        <span th:text="#{common.showing}">Showing</span> <span th:text="${totalItems}">0</span> <span th:text="#{common.total}">total</span> <span th:text="#{project.list}">projects</span>
+                    <div class="text-muted text-center mt-3">
+                        <span th:text="#{common.showing}">Showing</span> <strong th:text="${totalItems}">0</strong> <span th:text="#{common.total}">total</span> <span th:text="#{project.list}">projects</span>
                     </div>
                 </div>
             </div>

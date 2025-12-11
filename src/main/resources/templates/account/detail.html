@@ -6,28 +6,32 @@
     <title th:text="#{user.detail}">User Details</title>
 </head>
 <body>
-    <div layout:fragment="body">
+    <div layout:fragment="body" class="fade-in">
+        <div class="page-header d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-user"></i> <span th:text="${account.username}">Username</span> <span th:text="#{user.detail}">Details</span></h2>
+                <p class="text-muted mb-0" th:text="#{form.subtitle.view.user}">View user account information</p>
+            </div>
+            <div>
+                <a th:href="@{/accounts/{id}/edit(id=${account.id})}" 
+                   th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
+                   class="btn btn-primary me-2">
+                    <i class="fas fa-edit"></i> <span th:text="#{user.edit}">Edit User</span>
+                </a>
+                <a th:href="@{/accounts/{id}/change-password(id=${account.id})}" 
+                   th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
+                   class="btn btn-warning me-2">
+                    <i class="fas fa-key"></i> <span th:text="#{user.change.password}">Change Password</span>
+                </a>
+                <a th:href="@{/accounts}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> <span th:text="#{user.back.to.list}">Back to List</span>
+                </a>
+            </div>
+        </div>
+        
         <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-user"></i>
-                    <span th:text="${account.username}">Username</span> <span th:text="#{user.detail}">Details</span>
-                </h5>
-                <div>
-                    <a th:href="@{/accounts/{id}/edit(id=${account.id})}" 
-                       th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
-                       class="btn btn-sm btn-primary me-2">
-                        <i class="fas fa-edit"></i> <span th:text="#{user.edit}">Edit User</span>
-                    </a>
-                    <a th:href="@{/accounts/{id}/change-password(id=${account.id})}" 
-                       th:if="${account.roles.?[name == 'ADMIN'].isEmpty()}"
-                       class="btn btn-sm btn-warning me-2">
-                        <i class="fas fa-key"></i> <span th:text="#{user.change.password}">Change Password</span>
-                    </a>
-                    <a th:href="@{/accounts}" class="btn btn-sm btn-secondary">
-                        <i class="fas fa-arrow-left"></i> <span th:text="#{user.back.to.list}">Back to List</span>
-                    </a>
-                </div>
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> <span th:text="#{user.detail}">User Information</span></h5>
             </div>
             <div class="card-body">
                 <div class="row">
